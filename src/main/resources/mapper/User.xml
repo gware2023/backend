@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dev.gware.user.mapper.UserMapper">
+
+    <!-- 유저 조회 -->
+    <select id="findById" parameterType="String" resultType="UsrInfo">
+        SELECT USR_KEY as usrKey, USR_ID as usrId, KOR_NM as korNm, EMAIL_ADDR as emailAddr, USR_PWD as usrPwd
+        FROM USR_INFO
+        WHERE USR_ID = #{usrId}
+    </select>
+</mapper>

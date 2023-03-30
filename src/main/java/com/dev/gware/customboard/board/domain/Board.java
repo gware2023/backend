@@ -2,6 +2,7 @@ package com.dev.gware.customboard.board.domain;
 
 
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 
@@ -12,6 +13,7 @@ import javax.persistence.*;
 @ToString
 @NoArgsConstructor
 @RequiredArgsConstructor
+@DynamicInsert
 public class Board {
 
     @Id

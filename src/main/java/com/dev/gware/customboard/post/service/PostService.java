@@ -5,9 +5,13 @@ import com.dev.gware.customboard.post.dto.request.RegistPostReq;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
 import com.dev.gware.customboard.post.dto.response.GetPostListRes;
 import com.dev.gware.customboard.post.dto.response.GetPostRes;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 public interface PostService {
-    void registPost(RegistPostReq req);
+    void registPost(RegistPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles) throws IOException;
 
     GetPostRes getPost(long postId);
 

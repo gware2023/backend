@@ -1,5 +1,7 @@
 package com.dev.gware.customboard.post.service;
 
+import com.dev.gware.customboard.post.domain.AttachedFile;
+import com.dev.gware.customboard.post.domain.ImgFile;
 import com.dev.gware.customboard.post.domain.Post;
 import com.dev.gware.customboard.post.dto.PostInfo;
 import com.dev.gware.customboard.post.dto.request.GetPostListReq;
@@ -7,17 +9,25 @@ import com.dev.gware.customboard.post.dto.request.RegistPostReq;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
 import com.dev.gware.customboard.post.dto.response.GetPostListRes;
 import com.dev.gware.customboard.post.dto.response.GetPostRes;
+import com.dev.gware.customboard.post.repository.AttachedFileRepository;
+import com.dev.gware.customboard.post.repository.ImgFileRepository;
 import com.dev.gware.customboard.post.repository.PostRepository;
 import com.dev.gware.user.mapper.UserMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -26,14 +36,72 @@ public class PostServiceImpl implements PostService {
     PostRepository postRepository;
 
     @Autowired
+    AttachedFileRepository attachedFileRepository;
+
+    @Autowired
+    ImgFileRepository imgFileRepository;
+
+    @Autowired
     UserMapper userMapper;
 
+    @Value("${attached.file.dir}")
+    private String attachedFileDir;
+
+    @Value("${img.file.dir}")
+    private String imgFileDir;
+
     @Override
-    public void registPost(RegistPostReq req) {
+    public void registPost(RegistPostReq req, List<MultipartFile> attchedFiles, List<MultipartFile> imgFiles) throws IOException {
+        Post savedPost = savePost(req);
+
+        if (attchedFiles != null) {
+            saveFiles(attchedFiles, attachedFileRepository, attachedFileDir, savedPost.getPostId());
+        }
+
+        if (imgFiles != null) {
+            saveFiles(imgFiles, imgFileRepository, imgFileDir, savedPost.getPostId());
+        }
+    }
+
+    private Post savePost(RegistPostReq req) {
         Post post = new Post();
         BeanUtils.copyProperties(req, post);
 
-        postRepository.save(post);
+        return postRepository.save(post);
+    }
+
+    private void saveFiles(List<MultipartFile> files, JpaRepository repository, String fileDir, long postId) throws IOException {
+        for (MultipartFile file : files) {
+            String uploadFileName = file.getOriginalFilename();
+            String ext = extractExt(uploadFileName);
+            String saveFileName = UUID.randomUUID().toString() + "." + ext;
+
+            saveToDB(repository, saveFileName, uploadFileName, ext, postId);
+
+            saveToFolder(file, fileDir, saveFileName, ext);
+        }
+    }
+
+    private String extractExt(String uploadFileName) {
+        int index = uploadFileName.indexOf('.');
+        String ext = null;
+        if (index != -1) {
+            ext = uploadFileName.substring(index + 1);
+        }
+        return ext;
+    }
+
+    private void saveToDB(JpaRepository repository, String saveFileName, String uploadFileName, String ext, long postId) {
+        if (repository instanceof AttachedFileRepository) {
+            repository.save(new AttachedFile(saveFileName, uploadFileName, ext, postId));
+        } else if (repository instanceof ImgFileRepository) {
+            repository.save(new ImgFile(saveFileName, uploadFileName, ext, postId));
+        }
+    }
+
+    private void saveToFolder(MultipartFile file, String fileDir, String saveFileName, String ext) throws IOException {
+        String fullPath = fileDir + saveFileName + "." + ext;
+        file.transferTo(new File(fullPath));
     }
 
     @Override

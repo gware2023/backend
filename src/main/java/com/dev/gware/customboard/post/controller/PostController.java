@@ -2,6 +2,7 @@ package com.dev.gware.customboard.post.controller;
 
 import com.dev.gware.customboard.post.dto.request.GetPostListReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostReq;
+import com.dev.gware.customboard.post.dto.request.RegistPostServey;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
 import com.dev.gware.customboard.post.dto.response.GetPostListRes;
 import com.dev.gware.customboard.post.dto.response.GetPostRes;
@@ -25,9 +26,10 @@ public class PostController {
     @PostMapping
     public ResponseEntity<Object> registPost(@RequestPart RegistPostReq req,
                                              @RequestPart @Nullable List<MultipartFile> attachedFiles,
-                                             @RequestPart @Nullable List<MultipartFile> imgFiles) throws IOException {
+                                             @RequestPart @Nullable List<MultipartFile> imgFiles,
+                                             @RequestPart @Nullable RegistPostServey surveyReq) throws IOException {
 
-        postService.registPost(req, attachedFiles, imgFiles);
+        postService.registPost(req, attachedFiles, imgFiles, surveyReq);
 
         return ResponseEntity.ok().build();
     }

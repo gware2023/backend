@@ -1,17 +1,15 @@
 package com.dev.gware.customboard.post.service;
 
-import com.dev.gware.customboard.post.domain.AttachedFile;
-import com.dev.gware.customboard.post.domain.ImgFile;
-import com.dev.gware.customboard.post.domain.Post;
-import com.dev.gware.customboard.post.dto.PostInfo;
+import com.dev.gware.customboard.post.domain.*;
+import com.dev.gware.customboard.post.dto.request.RegistPostServey;
+import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionInfo;
+import com.dev.gware.customboard.post.dto.response.element.PostInfo;
 import com.dev.gware.customboard.post.dto.request.GetPostListReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostReq;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
 import com.dev.gware.customboard.post.dto.response.GetPostListRes;
 import com.dev.gware.customboard.post.dto.response.GetPostRes;
-import com.dev.gware.customboard.post.repository.AttachedFileRepository;
-import com.dev.gware.customboard.post.repository.ImgFileRepository;
-import com.dev.gware.customboard.post.repository.PostRepository;
+import com.dev.gware.customboard.post.repository.*;
 import com.dev.gware.user.mapper.UserMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -34,35 +33,79 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     PostRepository postRepository;
-
     @Autowired
     AttachedFileRepository attachedFileRepository;
-
     @Autowired
     ImgFileRepository imgFileRepository;
-
+    @Autowired
+    SurveyRepository surveyRepository;
+    @Autowired
+    SurveyQuestionRepository surveyQuestionRepository;
     @Autowired
     UserMapper userMapper;
 
     @Value("${attached.file.dir}")
     private String attachedFileDir;
-
     @Value("${img.file.dir}")
     private String imgFileDir;
 
     @Override
-    public void registPost(RegistPostReq req, List<MultipartFile> attchedFiles, List<MultipartFile> imgFiles) throws IOException {
+    public void registPost(RegistPostReq req, List<MultipartFile> attchedFiles, List<MultipartFile> imgFiles, RegistPostServey surveyReq) throws IOException {
         Post savedPost = savePost(req);
+        long postId = savedPost.getPostId();
 
         if (attchedFiles != null) {
-            saveFiles(attchedFiles, attachedFileRepository, attachedFileDir, savedPost.getPostId());
+            saveFiles(attchedFiles, attachedFileRepository, attachedFileDir, postId);
         }
-
         if (imgFiles != null) {
-            saveFiles(imgFiles, imgFileRepository, imgFileDir, savedPost.getPostId());
+            saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
+        }
+        if (surveyReq != null) {
+            saveSurveyAndSurveyQuestion(surveyReq, postId);
         }
     }
 
+    @Override
+    public GetPostRes getPost(long postId) {
+        Post post = postRepository.findByPostId(postId);
+
+        GetPostRes res = new GetPostRes();
+        BeanUtils.copyProperties(post, res);
+        res.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
+
+        return res;
+    }
+
+    @Override
+    public GetPostListRes getPostList(GetPostListReq req) {
+        Page<Post> postPage = findPostPage(req);
+
+        List<PostInfo> postInfoList = copyToPostInfoList(postPage);
+
+        GetPostListRes res = new GetPostListRes();
+        res.setPostInfoList(postInfoList);
+
+        return res;
+    }
+
+    @Override
+    public void updatePost(long postId, UpdatePostReq req) {
+        Post post = postRepository.findByPostId(postId);
+        post.setTitle(req.getTitle());
+        post.setContent(req.getContent());
+
+        postRepository.save(post);
+    }
+
+    @Override
+    public void deletePost(long postId) {
+        postRepository.deleteByPostId(postId);
+    }
+
+
+    /**
+     * 추출 메서드
+     **/
     private Post savePost(RegistPostReq req) {
         Post post = new Post();
         BeanUtils.copyProperties(req, post);
@@ -70,7 +113,8 @@ public class PostServiceImpl implements PostService {
         return postRepository.save(post);
     }
 
-    private void saveFiles(List<MultipartFile> files, JpaRepository repository, String fileDir, long postId) throws IOException {
+    @Transactional
+    void saveFiles(List<MultipartFile> files, JpaRepository repository, String fileDir, long postId) throws IOException {
         for (MultipartFile file : files) {
             String uploadFileName = file.getOriginalFilename();
             String ext = extractExt(uploadFileName);
@@ -104,24 +148,32 @@ public class PostServiceImpl implements PostService {
         file.transferTo(new File(fullPath));
     }
 
-    @Override
-    public GetPostRes getPost(long postId) {
-        Post post = postRepository.findByPostId(postId);
-
-        GetPostRes res = new GetPostRes();
-        BeanUtils.copyProperties(post, res);
-        res.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
-
-        return res;
+    @Transactional
+    void saveSurveyAndSurveyQuestion(RegistPostServey surveyReq, long postId) {
+        Survey savedSurvey = saveSurvey(surveyReq.getTitle(), postId);
+        saveSurveyQuestion(surveyReq.getSurveyQuestionInfoList(), savedSurvey.getSurveyId());
     }
 
-    @Override
-    public GetPostListRes getPostList(GetPostListReq req) {
-        long boardId = req.getBoardId();
-        int pageNum = req.getPageNum();
-        PageRequest pageRequest = PageRequest.of(pageNum - 1, 10, Sort.Direction.DESC, "postId");
-        Page<Post> postPage = postRepository.findByBoardId(boardId, pageRequest);
+    private Survey saveSurvey(String title, long postId) {
+        Survey survey = new Survey(title, postId);
 
+        return surveyRepository.save(survey);
+    }
+
+    private void saveSurveyQuestion(List<SurveyQuestionInfo> surveyQuestionInfoList, long surveyId) {
+        for (SurveyQuestionInfo surveyQuestionInfo : surveyQuestionInfoList) {
+            SurveyQuestion surveyQuestion = new SurveyQuestion(surveyQuestionInfo.getQuestion(), surveyId);
+
+            surveyQuestionRepository.save(surveyQuestion);
+        }
+    }
+
+    private Page<Post> findPostPage(GetPostListReq req) {
+        PageRequest pageRequest = PageRequest.of(req.getPageNum() - 1, 10, Sort.Direction.DESC, "postId");
+        return postRepository.findByBoardId(req.getBoardId(), pageRequest);
+    }
+
+    private List<PostInfo> copyToPostInfoList(Page<Post> postPage) {
         List<PostInfo> postInfoList = new ArrayList<>();
         for (Post post : postPage) {
             PostInfo postInfo = new PostInfo();
@@ -129,24 +181,6 @@ public class PostServiceImpl implements PostService {
             postInfo.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
             postInfoList.add(postInfo);
         }
-
-        GetPostListRes res = new GetPostListRes();
-        res.setPostInfoList(postInfoList);
-
-        return res;
-    }
-
-    @Override
-    public void updatePost(long postId, UpdatePostReq req) {
-        Post post = postRepository.findByPostId(postId);
-        post.setTitle(req.getTitle());
-        post.setContent(req.getContent());
-
-        postRepository.save(post);
-    }
-
-    @Override
-    public void deletePost(long postId) {
-        postRepository.deleteByPostId(postId);
+        return postInfoList;
     }
 }

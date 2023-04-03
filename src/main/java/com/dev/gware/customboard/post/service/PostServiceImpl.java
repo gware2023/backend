@@ -50,6 +50,7 @@ public class PostServiceImpl implements PostService {
     private String imgFileDir;
 
     @Override
+    @Transactional
     public void registPost(RegistPostReq req, List<MultipartFile> attchedFiles, List<MultipartFile> imgFiles, RegistPostServey surveyReq) throws IOException {
         Post savedPost = savePost(req);
         long postId = savedPost.getPostId();
@@ -113,8 +114,7 @@ public class PostServiceImpl implements PostService {
         return postRepository.save(post);
     }
 
-    @Transactional
-    void saveFiles(List<MultipartFile> files, JpaRepository repository, String fileDir, long postId) throws IOException {
+    private void saveFiles(List<MultipartFile> files, JpaRepository repository, String fileDir, long postId) throws IOException {
         for (MultipartFile file : files) {
             String uploadFileName = file.getOriginalFilename();
             String ext = extractExt(uploadFileName);
@@ -127,7 +127,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private String extractExt(String uploadFileName) {
-        int index = uploadFileName.indexOf('.');
+        int index = uploadFileName.lastIndexOf('.');
         String ext = null;
         if (index != -1) {
             ext = uploadFileName.substring(index + 1);
@@ -144,12 +144,11 @@ public class PostServiceImpl implements PostService {
     }
 
     private void saveToFolder(MultipartFile file, String fileDir, String saveFileName, String ext) throws IOException {
-        String fullPath = fileDir + saveFileName + "." + ext;
+        String fullPath = fileDir + saveFileName;
         file.transferTo(new File(fullPath));
     }
 
-    @Transactional
-    void saveSurveyAndSurveyQuestion(RegistPostServey surveyReq, long postId) {
+    private void saveSurveyAndSurveyQuestion(RegistPostServey surveyReq, long postId) {
         Survey savedSurvey = saveSurvey(surveyReq.getTitle(), postId);
         saveSurveyQuestion(surveyReq.getSurveyQuestionInfoList(), savedSurvey.getSurveyId());
     }

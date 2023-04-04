@@ -4,6 +4,10 @@ import com.dev.gware.customboard.post.domain.ImgFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ImgFileRepository extends JpaRepository<ImgFile, String> {
+
+    List<ImgFile> findByPostId(long postId);
 }

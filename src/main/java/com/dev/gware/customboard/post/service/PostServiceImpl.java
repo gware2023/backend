@@ -1,12 +1,13 @@
 package com.dev.gware.customboard.post.service;
 
 import com.dev.gware.customboard.post.domain.*;
-import com.dev.gware.customboard.post.dto.request.RegistPostServey;
-import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionInfo;
-import com.dev.gware.customboard.post.dto.response.element.PostInfo;
 import com.dev.gware.customboard.post.dto.request.GetPostListReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostReq;
+import com.dev.gware.customboard.post.dto.request.RegistPostServey;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
+import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionInfo;
+import com.dev.gware.customboard.post.dto.response.GetAttachedFileListRes;
+import com.dev.gware.customboard.post.dto.response.GetImgFileListRes;
 import com.dev.gware.customboard.post.dto.response.GetPostListRes;
 import com.dev.gware.customboard.post.dto.response.GetPostRes;
 import com.dev.gware.customboard.post.repository.*;
@@ -14,6 +15,7 @@ import com.dev.gware.user.mapper.UserMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -78,15 +81,50 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public GetPostListRes getPostList(GetPostListReq req) {
+    public List<GetAttachedFileListRes> getAttachedFileList(long postId) {
+        List<AttachedFile> attachedFileList = attachedFileRepository.findByPostId(postId);
+
+        List<GetAttachedFileListRes> resList = new ArrayList<>();
+        for (AttachedFile attachedFile : attachedFileList) {
+            GetAttachedFileListRes res = new GetAttachedFileListRes();
+            BeanUtils.copyProperties(attachedFile, res);
+            resList.add(res);
+        }
+
+        return resList;
+    }
+
+    @Override
+    public List<GetImgFileListRes> getImgFileList(long postId) {
+        List<ImgFile> imgFileList = imgFileRepository.findByPostId(postId);
+
+        List<GetImgFileListRes> resList = new ArrayList<>();
+        for (ImgFile imgFile : imgFileList) {
+            GetImgFileListRes res = new GetImgFileListRes();
+            BeanUtils.copyProperties(imgFile, res);
+            resList.add(res);
+        }
+
+        return resList;
+    }
+
+    @Override
+    public UrlResource downloadAttachedFile(String storeFileName) throws MalformedURLException {
+        return new UrlResource("file:" + attachedFileDir + storeFileName);
+    }
+
+    @Override
+    public UrlResource downloadImgFile(String storeFileName) throws MalformedURLException {
+        return new UrlResource("file:" + imgFileDir + storeFileName);
+    }
+
+    @Override
+    public List<GetPostListRes> getPostList(GetPostListReq req) {
         Page<Post> postPage = findPostPage(req);
 
-        List<PostInfo> postInfoList = copyToPostInfoList(postPage);
+        List<GetPostListRes> resList = copyToResList(postPage);
 
-        GetPostListRes res = new GetPostListRes();
-        res.setPostInfoList(postInfoList);
-
-        return res;
+        return resList;
     }
 
     @Override
@@ -172,14 +210,14 @@ public class PostServiceImpl implements PostService {
         return postRepository.findByBoardId(req.getBoardId(), pageRequest);
     }
 
-    private List<PostInfo> copyToPostInfoList(Page<Post> postPage) {
-        List<PostInfo> postInfoList = new ArrayList<>();
+    private List<GetPostListRes> copyToResList(Page<Post> postPage) {
+        List<GetPostListRes> resList = new ArrayList<>();
         for (Post post : postPage) {
-            PostInfo postInfo = new PostInfo();
-            BeanUtils.copyProperties(post, postInfo);
-            postInfo.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
-            postInfoList.add(postInfo);
+            GetPostListRes res = new GetPostListRes();
+            BeanUtils.copyProperties(post, res);
+            res.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
+            resList.add(res);
         }
-        return postInfoList;
+        return resList;
     }
 }

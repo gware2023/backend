@@ -4,11 +4,15 @@ import com.dev.gware.customboard.post.dto.request.GetPostListReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostServey;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
+import com.dev.gware.customboard.post.dto.response.GetAttachedFileListRes;
+import com.dev.gware.customboard.post.dto.response.GetImgFileListRes;
 import com.dev.gware.customboard.post.dto.response.GetPostListRes;
 import com.dev.gware.customboard.post.dto.response.GetPostRes;
+import org.springframework.core.io.UrlResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 public interface PostService {
@@ -16,7 +20,15 @@ public interface PostService {
 
     GetPostRes getPost(long postId);
 
-    GetPostListRes getPostList(GetPostListReq req);
+    List<GetAttachedFileListRes> getAttachedFileList(long postId);
+
+    List<GetImgFileListRes> getImgFileList(long postId);
+
+    UrlResource downloadAttachedFile(String storeFileName) throws MalformedURLException;
+
+    UrlResource downloadImgFile(String storeFileName) throws MalformedURLException;
+
+    List<GetPostListRes> getPostList(GetPostListReq req);
 
     void updatePost(long postId, UpdatePostReq req);
 

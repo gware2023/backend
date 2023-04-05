@@ -2,6 +2,7 @@ package com.dev.gware.user;
 
 import com.dev.gware.auth.domain.AuthUser;
 import com.dev.gware.user.domain.UsrInfo;
+import com.dev.gware.user.dto.GetUserRes;
 import com.dev.gware.user.exception.UserNotFoundException;
 import com.dev.gware.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +36,13 @@ public class UserService implements UserDetailsService {
                 .usrId(findUsrInfo.getUsrId())
                 .usrPwd(findUsrInfo.getUsrPwd())
                 .build();
+    }
+
+    public GetUserRes findByKey(Long usrKey) {
+        UsrInfo findUser = userMapper.findByKey(usrKey);
+        if (findUser == null) {
+            throw new UserNotFoundException();
+        }
+        return new GetUserRes(findUser);
     }
 }

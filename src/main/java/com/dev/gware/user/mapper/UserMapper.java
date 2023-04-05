@@ -7,4 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UserMapper {
 
     UsrInfo findById(String usrId);
+
+    UsrInfo findByKey(Long usrKey);
 }

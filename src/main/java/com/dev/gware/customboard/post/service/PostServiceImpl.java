@@ -5,11 +5,9 @@ import com.dev.gware.customboard.post.dto.request.GetPostListReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostServey;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
-import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionInfo;
-import com.dev.gware.customboard.post.dto.response.GetAttachedFileListRes;
-import com.dev.gware.customboard.post.dto.response.GetImgFileListRes;
-import com.dev.gware.customboard.post.dto.response.GetPostListRes;
-import com.dev.gware.customboard.post.dto.response.GetPostRes;
+import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionReq;
+import com.dev.gware.customboard.post.dto.response.*;
+import com.dev.gware.customboard.post.dto.response.element.SurveyQuestionRes;
 import com.dev.gware.customboard.post.repository.*;
 import com.dev.gware.user.mapper.UserMapper;
 import org.springframework.beans.BeanUtils;
@@ -119,6 +117,23 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public GetSurveyRes getSurvey(long postId) {
+        Survey survey = surveyRepository.findByPostId(postId);
+        List<SurveyQuestion> surveyQuestionList = surveyQuestionRepository.findBySurveyId(survey.getSurveyId());
+
+        GetSurveyRes res = new GetSurveyRes();
+        res.setSurveyQuestionResList(new ArrayList<>());
+        BeanUtils.copyProperties(survey, res);
+        for (SurveyQuestion surveyQuestion : surveyQuestionList) {
+            SurveyQuestionRes surveyQuestionRes = new SurveyQuestionRes();
+            BeanUtils.copyProperties(surveyQuestion, surveyQuestionRes);
+            res.getSurveyQuestionResList().add(surveyQuestionRes);
+        }
+
+        return res;
+    }
+
+    @Override
     public List<GetPostListRes> getPostList(GetPostListReq req) {
         Page<Post> postPage = findPostPage(req);
 
@@ -188,7 +203,7 @@ public class PostServiceImpl implements PostService {
 
     private void saveSurveyAndSurveyQuestion(RegistPostServey surveyReq, long postId) {
         Survey savedSurvey = saveSurvey(surveyReq.getTitle(), postId);
-        saveSurveyQuestion(surveyReq.getSurveyQuestionInfoList(), savedSurvey.getSurveyId());
+        saveSurveyQuestion(surveyReq.getSurveyQuestionReqList(), savedSurvey.getSurveyId());
     }
 
     private Survey saveSurvey(String title, long postId) {
@@ -197,9 +212,9 @@ public class PostServiceImpl implements PostService {
         return surveyRepository.save(survey);
     }
 
-    private void saveSurveyQuestion(List<SurveyQuestionInfo> surveyQuestionInfoList, long surveyId) {
-        for (SurveyQuestionInfo surveyQuestionInfo : surveyQuestionInfoList) {
-            SurveyQuestion surveyQuestion = new SurveyQuestion(surveyQuestionInfo.getQuestion(), surveyId);
+    private void saveSurveyQuestion(List<SurveyQuestionReq> surveyQuestionReqList, long surveyId) {
+        for (SurveyQuestionReq surveyQuestionReq : surveyQuestionReqList) {
+            SurveyQuestion surveyQuestion = new SurveyQuestion(surveyQuestionReq.getQuestion(), surveyId);
 
             surveyQuestionRepository.save(surveyQuestion);
         }

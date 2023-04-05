@@ -4,10 +4,7 @@ import com.dev.gware.customboard.post.dto.request.GetPostListReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostReq;
 import com.dev.gware.customboard.post.dto.request.RegistPostServey;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
-import com.dev.gware.customboard.post.dto.response.GetAttachedFileListRes;
-import com.dev.gware.customboard.post.dto.response.GetImgFileListRes;
-import com.dev.gware.customboard.post.dto.response.GetPostListRes;
-import com.dev.gware.customboard.post.dto.response.GetPostRes;
+import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.repository.AttachedFileRepository;
 import com.dev.gware.customboard.post.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +86,15 @@ public class PostController {
         return ResponseEntity.ok().body(res);
     }
 
+    @GetMapping("/{postId}/survey")
+    public ResponseEntity<Object> getSurvey(@PathVariable long postId) {
+
+        //TODO 요청한 유저의 투표 여부 추가
+        GetSurveyRes res = postService.getSurvey(postId);
+
+        return ResponseEntity.ok().body(res);
+    }
+
     @GetMapping
     public ResponseEntity<Object> getPostList(@RequestBody GetPostListReq req) {
 
@@ -97,6 +103,7 @@ public class PostController {
         return ResponseEntity.ok().body(resList);
     }
 
+    //TODO 파일 설문조사 추가
     @PutMapping("/{postId}")
     public ResponseEntity<Object> updatePost(@PathVariable long postId, @RequestBody UpdatePostReq req) {
 

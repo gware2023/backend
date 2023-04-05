@@ -1,19 +1,16 @@
 package com.dev.gware.customboard.post.service;
 
 import com.dev.gware.customboard.post.domain.*;
-import com.dev.gware.customboard.post.dto.request.RegistPostServey;
-import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionInfo;
-import com.dev.gware.customboard.post.dto.response.element.PostInfo;
-import com.dev.gware.customboard.post.dto.request.GetPostListReq;
-import com.dev.gware.customboard.post.dto.request.RegistPostReq;
-import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
-import com.dev.gware.customboard.post.dto.response.GetPostListRes;
-import com.dev.gware.customboard.post.dto.response.GetPostRes;
+import com.dev.gware.customboard.post.dto.request.*;
+import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionReq;
+import com.dev.gware.customboard.post.dto.response.*;
+import com.dev.gware.customboard.post.dto.response.element.SurveyQuestionRes;
 import com.dev.gware.customboard.post.repository.*;
 import com.dev.gware.user.mapper.UserMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -51,12 +49,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void registPost(RegistPostReq req, List<MultipartFile> attchedFiles, List<MultipartFile> imgFiles, RegistPostServey surveyReq) throws IOException {
+    public void registPost(RegistPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException {
         Post savedPost = savePost(req);
         long postId = savedPost.getPostId();
 
-        if (attchedFiles != null) {
-            saveFiles(attchedFiles, attachedFileRepository, attachedFileDir, postId);
+        if (attachedFiles != null) {
+            saveFiles(attachedFiles, attachedFileRepository, attachedFileDir, postId);
         }
         if (imgFiles != null) {
             saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
@@ -78,24 +76,87 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public GetPostListRes getPostList(GetPostListReq req) {
-        Page<Post> postPage = findPostPage(req);
+    public List<GetAttachedFileListRes> getAttachedFileList(long postId) {
+        List<AttachedFile> attachedFileList = attachedFileRepository.findByPostId(postId);
 
-        List<PostInfo> postInfoList = copyToPostInfoList(postPage);
+        List<GetAttachedFileListRes> resList = new ArrayList<>();
+        for (AttachedFile attachedFile : attachedFileList) {
+            GetAttachedFileListRes res = new GetAttachedFileListRes();
+            BeanUtils.copyProperties(attachedFile, res);
+            resList.add(res);
+        }
 
-        GetPostListRes res = new GetPostListRes();
-        res.setPostInfoList(postInfoList);
+        return resList;
+    }
+
+    @Override
+    public List<GetImgFileListRes> getImgFileList(long postId) {
+        List<ImgFile> imgFileList = imgFileRepository.findByPostId(postId);
+
+        List<GetImgFileListRes> resList = new ArrayList<>();
+        for (ImgFile imgFile : imgFileList) {
+            GetImgFileListRes res = new GetImgFileListRes();
+            BeanUtils.copyProperties(imgFile, res);
+            resList.add(res);
+        }
+
+        return resList;
+    }
+
+    @Override
+    public UrlResource downloadAttachedFile(String storeFileName) throws MalformedURLException {
+        return new UrlResource("file:" + attachedFileDir + storeFileName);
+    }
+
+    @Override
+    public UrlResource downloadImgFile(String storeFileName) throws MalformedURLException {
+        return new UrlResource("file:" + imgFileDir + storeFileName);
+    }
+
+    @Override
+    public GetSurveyRes getSurvey(long postId) {
+        Survey survey = surveyRepository.findByPostId(postId);
+        List<SurveyQuestion> surveyQuestionList = surveyQuestionRepository.findBySurveyId(survey.getSurveyId());
+
+        GetSurveyRes res = new GetSurveyRes();
+        res.setSurveyQuestionResList(new ArrayList<>());
+        BeanUtils.copyProperties(survey, res);
+        for (SurveyQuestion surveyQuestion : surveyQuestionList) {
+            SurveyQuestionRes surveyQuestionRes = new SurveyQuestionRes();
+            BeanUtils.copyProperties(surveyQuestion, surveyQuestionRes);
+            res.getSurveyQuestionResList().add(surveyQuestionRes);
+        }
 
         return res;
     }
 
     @Override
-    public void updatePost(long postId, UpdatePostReq req) {
-        Post post = postRepository.findByPostId(postId);
-        post.setTitle(req.getTitle());
-        post.setContent(req.getContent());
+    public List<GetPostListRes> getPostList(GetPostListReq req) {
+        Page<Post> postPage = findPostPage(req);
 
-        postRepository.save(post);
+        List<GetPostListRes> resList = copyToResList(postPage);
+
+        return resList;
+    }
+
+    @Override
+    @Transactional
+    public void updatePost(long postId, UpdatePostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException {
+        changePost(postId, req);
+
+        deleteFiles(attachedFileRepository, attachedFileDir, postId);
+        deleteFiles(imgFileRepository, imgFileDir, postId);
+        surveyRepository.deleteByPostId(postId);
+
+        if (attachedFiles != null) {
+            saveFiles(attachedFiles, attachedFileRepository, attachedFileDir, postId);
+        }
+        if (imgFiles != null) {
+            saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
+        }
+        if (surveyReq != null) {
+            saveSurveyAndSurveyQuestion(surveyReq, postId);
+        }
     }
 
     @Override
@@ -148,9 +209,9 @@ public class PostServiceImpl implements PostService {
         file.transferTo(new File(fullPath));
     }
 
-    private void saveSurveyAndSurveyQuestion(RegistPostServey surveyReq, long postId) {
+    private void saveSurveyAndSurveyQuestion(SurveyReq surveyReq, long postId) {
         Survey savedSurvey = saveSurvey(surveyReq.getTitle(), postId);
-        saveSurveyQuestion(surveyReq.getSurveyQuestionInfoList(), savedSurvey.getSurveyId());
+        saveSurveyQuestion(surveyReq.getSurveyQuestionReqList(), savedSurvey.getSurveyId());
     }
 
     private Survey saveSurvey(String title, long postId) {
@@ -159,9 +220,9 @@ public class PostServiceImpl implements PostService {
         return surveyRepository.save(survey);
     }
 
-    private void saveSurveyQuestion(List<SurveyQuestionInfo> surveyQuestionInfoList, long surveyId) {
-        for (SurveyQuestionInfo surveyQuestionInfo : surveyQuestionInfoList) {
-            SurveyQuestion surveyQuestion = new SurveyQuestion(surveyQuestionInfo.getQuestion(), surveyId);
+    private void saveSurveyQuestion(List<SurveyQuestionReq> surveyQuestionReqList, long surveyId) {
+        for (SurveyQuestionReq surveyQuestionReq : surveyQuestionReqList) {
+            SurveyQuestion surveyQuestion = new SurveyQuestion(surveyQuestionReq.getQuestion(), surveyId);
 
             surveyQuestionRepository.save(surveyQuestion);
         }
@@ -172,14 +233,50 @@ public class PostServiceImpl implements PostService {
         return postRepository.findByBoardId(req.getBoardId(), pageRequest);
     }
 
-    private List<PostInfo> copyToPostInfoList(Page<Post> postPage) {
-        List<PostInfo> postInfoList = new ArrayList<>();
+    private List<GetPostListRes> copyToResList(Page<Post> postPage) {
+        List<GetPostListRes> resList = new ArrayList<>();
         for (Post post : postPage) {
-            PostInfo postInfo = new PostInfo();
-            BeanUtils.copyProperties(post, postInfo);
-            postInfo.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
-            postInfoList.add(postInfo);
+            GetPostListRes res = new GetPostListRes();
+            BeanUtils.copyProperties(post, res);
+            res.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
+            resList.add(res);
         }
-        return postInfoList;
+        return resList;
+    }
+
+    private void changePost(long postId, UpdatePostReq req) {
+        Post post = postRepository.findByPostId(postId);
+        post.setTitle(req.getTitle());
+        post.setContent(req.getContent());
+        postRepository.save(post);
+    }
+
+    private void deleteFiles(JpaRepository repository, String fileDir, long postId) {
+        deleteFromFolder(repository, fileDir, postId);
+        deleteFromDB(repository, postId);
+    }
+
+    private void deleteFromFolder(JpaRepository repository, String fileDir, long postId) {
+        if (repository instanceof AttachedFileRepository) {
+            List<AttachedFile> attachedFileList = attachedFileRepository.findByPostId(postId);
+            for (AttachedFile attachedFile : attachedFileList) {
+                File file = new File(attachedFileDir + attachedFile.getStoreFileName());
+                file.delete();
+            }
+        } else if (repository instanceof ImgFileRepository) {
+            List<ImgFile> imgFileList = imgFileRepository.findByPostId(postId);
+            for (ImgFile imgFile : imgFileList) {
+                File file = new File(attachedFileDir + imgFile.getStoreFileName());
+                file.delete();
+            }
+        }
+    }
+
+    private void deleteFromDB(JpaRepository repository, long postId) {
+        if (repository instanceof AttachedFileRepository) {
+            attachedFileRepository.deleteByPostId(postId);
+        } else if (repository instanceof ImgFileRepository) {
+            imgFileRepository.deleteByPostId(postId);
+        }
     }
 }

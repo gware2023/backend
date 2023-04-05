@@ -7,6 +7,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class SurveyQuestionInfo {
+public class SurveyQuestionReq {
     String question;
 }

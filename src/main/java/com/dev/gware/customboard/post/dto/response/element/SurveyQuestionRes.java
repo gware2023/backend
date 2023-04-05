@@ -7,11 +7,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class PostInfo {
-    long postId;
-    String title;
-    String userName;
-    String time;
-    long viewCount;
-    long recommendationCount;
+public class SurveyQuestionRes {
+    long questionId;
+    String question;
+    long voteCount;
 }

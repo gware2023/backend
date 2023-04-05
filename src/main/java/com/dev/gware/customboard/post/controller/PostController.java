@@ -1,9 +1,6 @@
 package com.dev.gware.customboard.post.controller;
 
-import com.dev.gware.customboard.post.dto.request.GetPostListReq;
-import com.dev.gware.customboard.post.dto.request.RegistPostReq;
-import com.dev.gware.customboard.post.dto.request.RegistPostServey;
-import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
+import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.repository.AttachedFileRepository;
 import com.dev.gware.customboard.post.service.PostService;
@@ -34,7 +31,7 @@ public class PostController {
     public ResponseEntity<Object> registPost(@RequestPart RegistPostReq req,
                                              @RequestPart @Nullable List<MultipartFile> attachedFiles,
                                              @RequestPart @Nullable List<MultipartFile> imgFiles,
-                                             @RequestPart @Nullable RegistPostServey surveyReq) throws IOException {
+                                             @RequestPart @Nullable SurveyReq surveyReq) throws IOException {
 
         postService.registPost(req, attachedFiles, imgFiles, surveyReq);
 
@@ -103,11 +100,14 @@ public class PostController {
         return ResponseEntity.ok().body(resList);
     }
 
-    //TODO 파일 설문조사 추가
     @PutMapping("/{postId}")
-    public ResponseEntity<Object> updatePost(@PathVariable long postId, @RequestBody UpdatePostReq req) {
+    public ResponseEntity<Object> updatePost(@PathVariable long postId,
+                                             @RequestPart UpdatePostReq req,
+                                             @RequestPart @Nullable List<MultipartFile> attachedFiles,
+                                             @RequestPart @Nullable List<MultipartFile> imgFiles,
+                                             @RequestPart @Nullable SurveyReq surveyReq) throws IOException {
 
-        postService.updatePost(postId, req);
+        postService.updatePost(postId, req, attachedFiles, imgFiles, surveyReq);
 
         return ResponseEntity.ok().build();
     }

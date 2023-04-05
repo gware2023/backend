@@ -3,6 +3,7 @@ package com.dev.gware.customboard.post.repository;
 import com.dev.gware.customboard.post.domain.AttachedFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,4 +13,7 @@ public interface AttachedFileRepository extends JpaRepository<AttachedFile, Stri
     AttachedFile findByStoreFileName(String storeFileName);
 
     List<AttachedFile> findByPostId(long postId);
+
+    @Transactional
+    void deleteByPostId(long postId);
 }

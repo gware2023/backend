@@ -1,10 +1,7 @@
 package com.dev.gware.customboard.post.service;
 
 import com.dev.gware.customboard.post.domain.*;
-import com.dev.gware.customboard.post.dto.request.GetPostListReq;
-import com.dev.gware.customboard.post.dto.request.RegistPostReq;
-import com.dev.gware.customboard.post.dto.request.RegistPostServey;
-import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
+import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionReq;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.dto.response.element.SurveyQuestionRes;
@@ -52,12 +49,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void registPost(RegistPostReq req, List<MultipartFile> attchedFiles, List<MultipartFile> imgFiles, RegistPostServey surveyReq) throws IOException {
+    public void registPost(RegistPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException {
         Post savedPost = savePost(req);
         long postId = savedPost.getPostId();
 
-        if (attchedFiles != null) {
-            saveFiles(attchedFiles, attachedFileRepository, attachedFileDir, postId);
+        if (attachedFiles != null) {
+            saveFiles(attachedFiles, attachedFileRepository, attachedFileDir, postId);
         }
         if (imgFiles != null) {
             saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
@@ -143,12 +140,23 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updatePost(long postId, UpdatePostReq req) {
-        Post post = postRepository.findByPostId(postId);
-        post.setTitle(req.getTitle());
-        post.setContent(req.getContent());
+    @Transactional
+    public void updatePost(long postId, UpdatePostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException {
+        changePost(postId, req);
 
-        postRepository.save(post);
+        deleteFiles(attachedFileRepository, attachedFileDir, postId);
+        deleteFiles(imgFileRepository, imgFileDir, postId);
+        surveyRepository.deleteByPostId(postId);
+
+        if (attachedFiles != null) {
+            saveFiles(attachedFiles, attachedFileRepository, attachedFileDir, postId);
+        }
+        if (imgFiles != null) {
+            saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
+        }
+        if (surveyReq != null) {
+            saveSurveyAndSurveyQuestion(surveyReq, postId);
+        }
     }
 
     @Override
@@ -201,7 +209,7 @@ public class PostServiceImpl implements PostService {
         file.transferTo(new File(fullPath));
     }
 
-    private void saveSurveyAndSurveyQuestion(RegistPostServey surveyReq, long postId) {
+    private void saveSurveyAndSurveyQuestion(SurveyReq surveyReq, long postId) {
         Survey savedSurvey = saveSurvey(surveyReq.getTitle(), postId);
         saveSurveyQuestion(surveyReq.getSurveyQuestionReqList(), savedSurvey.getSurveyId());
     }
@@ -234,5 +242,41 @@ public class PostServiceImpl implements PostService {
             resList.add(res);
         }
         return resList;
+    }
+
+    private void changePost(long postId, UpdatePostReq req) {
+        Post post = postRepository.findByPostId(postId);
+        post.setTitle(req.getTitle());
+        post.setContent(req.getContent());
+        postRepository.save(post);
+    }
+
+    private void deleteFiles(JpaRepository repository, String fileDir, long postId) {
+        deleteFromFolder(repository, fileDir, postId);
+        deleteFromDB(repository, postId);
+    }
+
+    private void deleteFromFolder(JpaRepository repository, String fileDir, long postId) {
+        if (repository instanceof AttachedFileRepository) {
+            List<AttachedFile> attachedFileList = attachedFileRepository.findByPostId(postId);
+            for (AttachedFile attachedFile : attachedFileList) {
+                File file = new File(attachedFileDir + attachedFile.getStoreFileName());
+                file.delete();
+            }
+        } else if (repository instanceof ImgFileRepository) {
+            List<ImgFile> imgFileList = imgFileRepository.findByPostId(postId);
+            for (ImgFile imgFile : imgFileList) {
+                File file = new File(attachedFileDir + imgFile.getStoreFileName());
+                file.delete();
+            }
+        }
+    }
+
+    private void deleteFromDB(JpaRepository repository, long postId) {
+        if (repository instanceof AttachedFileRepository) {
+            attachedFileRepository.deleteByPostId(postId);
+        } else if (repository instanceof ImgFileRepository) {
+            imgFileRepository.deleteByPostId(postId);
+        }
     }
 }

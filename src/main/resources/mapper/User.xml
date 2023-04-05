@@ -17,4 +17,9 @@
         FROM USR_INFO
         WHERE USR_KEY = #{usrKey}
     </select>
+
+    <update id="updateUser" parameterType="UpdateUserReq">
+        UPDATE USR_INFO SET KOR_NM = #{korNm}, EMAIL_ADDR = #{emailAddr}
+        WHERE USR_KEY = #{usrKey}
+    </update>
 </mapper>

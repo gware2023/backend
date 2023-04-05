@@ -1,4 +1,4 @@
-package com.dev.gware.user.dto;
+package com.dev.gware.user.dto.response;
 
 import com.dev.gware.user.domain.UsrInfo;
 import lombok.Data;

@@ -1,6 +1,9 @@
 package com.dev.gware.customboard.post.controller;
 
-import com.dev.gware.customboard.post.dto.request.*;
+import com.dev.gware.customboard.post.dto.request.GetPostListReq;
+import com.dev.gware.customboard.post.dto.request.RegistPostReq;
+import com.dev.gware.customboard.post.dto.request.SurveyReq;
+import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.repository.AttachedFileRepository;
 import com.dev.gware.customboard.post.service.PostService;
@@ -9,9 +12,13 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -20,6 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
+@Validated
 public class PostController {
 
     @Autowired
@@ -28,10 +36,10 @@ public class PostController {
     AttachedFileRepository attachedFileRepository;
 
     @PostMapping
-    public ResponseEntity<Object> registPost(@RequestPart RegistPostReq req,
+    public ResponseEntity<Object> registPost(@RequestPart @Valid RegistPostReq req,
                                              @RequestPart @Nullable List<MultipartFile> attachedFiles,
                                              @RequestPart @Nullable List<MultipartFile> imgFiles,
-                                             @RequestPart @Nullable SurveyReq surveyReq) throws IOException {
+                                             @RequestPart @Nullable @Valid SurveyReq surveyReq) throws IOException {
 
         postService.registPost(req, attachedFiles, imgFiles, surveyReq);
 
@@ -39,7 +47,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<Object> getPost(@PathVariable long postId) {
+    public ResponseEntity<Object> getPost(@PathVariable @Min(1L) long postId) {
 
         GetPostRes res = postService.getPost(postId);
 
@@ -47,7 +55,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/attached-files")
-    public ResponseEntity<Object> getAttachedFileList(@PathVariable long postId) {
+    public ResponseEntity<Object> getAttachedFileList(@PathVariable @Min(1L) long postId) {
 
         List<GetAttachedFileListRes> resList = postService.getAttachedFileList(postId);
 
@@ -55,7 +63,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/img-files")
-    public ResponseEntity<Object> getImgFileList(@PathVariable long postId) {
+    public ResponseEntity<Object> getImgFileList(@PathVariable @Min(1L) long postId) {
 
         List<GetImgFileListRes> resList = postService.getImgFileList(postId);
 
@@ -63,7 +71,7 @@ public class PostController {
     }
 
     @GetMapping("/attached-files/{storeFileName}")
-    public ResponseEntity<Object> downloadAttachedFile(@PathVariable String storeFileName) throws MalformedURLException, UnsupportedEncodingException {
+    public ResponseEntity<Object> downloadAttachedFile(@PathVariable @NotBlank String storeFileName) throws MalformedURLException, UnsupportedEncodingException {
 
         UrlResource res = postService.downloadAttachedFile(storeFileName);
 
@@ -76,7 +84,7 @@ public class PostController {
     }
 
     @GetMapping("/img-files/{storeFileName}")
-    public ResponseEntity<Object> downloadImgFile(@PathVariable String storeFileName) throws MalformedURLException {
+    public ResponseEntity<Object> downloadImgFile(@PathVariable @NotBlank String storeFileName) throws MalformedURLException {
 
         UrlResource res = postService.downloadImgFile(storeFileName);
 
@@ -84,7 +92,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/survey")
-    public ResponseEntity<Object> getSurvey(@PathVariable long postId) {
+    public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId) {
 
         //TODO 요청한 유저의 투표 여부 추가
         GetSurveyRes res = postService.getSurvey(postId);
@@ -93,7 +101,7 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getPostList(@RequestBody GetPostListReq req) {
+    public ResponseEntity<Object> getPostList(@RequestBody @Valid GetPostListReq req) {
 
         List<GetPostListRes> resList = postService.getPostList(req);
 
@@ -101,11 +109,11 @@ public class PostController {
     }
 
     @PutMapping("/{postId}")
-    public ResponseEntity<Object> updatePost(@PathVariable long postId,
-                                             @RequestPart UpdatePostReq req,
+    public ResponseEntity<Object> updatePost(@PathVariable @Min(1L) long postId,
+                                             @RequestPart @Valid UpdatePostReq req,
                                              @RequestPart @Nullable List<MultipartFile> attachedFiles,
                                              @RequestPart @Nullable List<MultipartFile> imgFiles,
-                                             @RequestPart @Nullable SurveyReq surveyReq) throws IOException {
+                                             @RequestPart @Nullable @Valid SurveyReq surveyReq) throws IOException {
 
         postService.updatePost(postId, req, attachedFiles, imgFiles, surveyReq);
 
@@ -113,7 +121,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Object> deletePost(@PathVariable long postId) {
+    public ResponseEntity<Object> deletePost(@PathVariable @Min(1L) long postId) {
 
         postService.deletePost(postId);
 

@@ -5,12 +5,16 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter
 @Setter
 @ToString
 public class SurveyReq {
+    @NotBlank
     String title;
+    @Size(min = 1)
     List<SurveyQuestionReq> surveyQuestionReqList;
 }

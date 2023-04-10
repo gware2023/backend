@@ -35,8 +35,11 @@ public class Post {
     @Column(name = "USER_ID")
     long userId;
 
-    @Column(name = "TIME")
-    String time;
+    @Column(name = "CREATE_DATETIME")
+    String createDatetime;
+
+    @Column(name = "MODIFY_DATETIME")
+    String modifyDatetime;
 
     @NonNull
     @Column(name = "VIEW_COUNT")

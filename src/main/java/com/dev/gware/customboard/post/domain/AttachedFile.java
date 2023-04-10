@@ -30,4 +30,7 @@ public class AttachedFile {
     @NonNull
     @Column(name = "POST_ID")
     long postId;
+
+    @Column(name = "SAVE_DATETIME")
+    String saveDatetime;
 }

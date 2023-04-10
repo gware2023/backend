@@ -1,15 +1,11 @@
 package com.dev.gware.customboard.board.controller;
 
-import com.dev.gware.customboard.board.domain.Board;
-import com.dev.gware.customboard.board.dto.request.RegistBoardReq;
+import com.dev.gware.customboard.board.dto.request.AddBoardReq;
 import com.dev.gware.customboard.board.dto.response.GetBoardListRes;
 import com.dev.gware.customboard.board.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/boards")
@@ -19,9 +15,9 @@ public class BoardController {
     BoardService boardService;
 
     @PostMapping
-    public ResponseEntity<Object> registBoard(@RequestBody RegistBoardReq req) {
+    public ResponseEntity<Object> addBoard(@RequestBody AddBoardReq req) {
 
-        boardService.registBoard(req);
+        boardService.addBoard(req);
 
         return ResponseEntity.ok().build();
     }

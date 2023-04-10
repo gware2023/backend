@@ -1,7 +1,7 @@
 package com.dev.gware.customboard.post.controller;
 
 import com.dev.gware.customboard.post.dto.request.GetPostListReq;
-import com.dev.gware.customboard.post.dto.request.RegistPostReq;
+import com.dev.gware.customboard.post.dto.request.AddPostReq;
 import com.dev.gware.customboard.post.dto.request.SurveyReq;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
 import com.dev.gware.customboard.post.dto.response.*;
@@ -36,12 +36,12 @@ public class PostController {
     AttachedFileRepository attachedFileRepository;
 
     @PostMapping
-    public ResponseEntity<Object> registPost(@RequestPart @Valid RegistPostReq req,
+    public ResponseEntity<Object> addPost(@RequestPart @Valid AddPostReq req,
                                              @RequestPart @Nullable List<MultipartFile> attachedFiles,
                                              @RequestPart @Nullable List<MultipartFile> imgFiles,
                                              @RequestPart @Nullable @Valid SurveyReq surveyReq) throws IOException {
 
-        postService.registPost(req, attachedFiles, imgFiles, surveyReq);
+        postService.addPost(req, attachedFiles, imgFiles, surveyReq);
 
         return ResponseEntity.ok().build();
     }

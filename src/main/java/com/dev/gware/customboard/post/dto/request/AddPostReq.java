@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @ToString
-public class RegistPostReq {
+public class AddPostReq {
     @Min(1L)
     long boardId;
     @NotBlank

@@ -21,7 +21,7 @@ public class GetPostRes {
 
     String userName;
 
-    String time;
+    String createDatetime;
 
     long viewCount;
 

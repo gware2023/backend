@@ -10,7 +10,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 public interface PostService {
-    void registPost(RegistPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException;
+    void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException;
 
     GetPostRes getPost(long postId);
 

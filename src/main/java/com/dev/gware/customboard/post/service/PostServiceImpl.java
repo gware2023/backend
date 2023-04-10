@@ -51,7 +51,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void registPost(RegistPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException {
+    public void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException {
         Post savedPost = savePost(req);
         long postId = savedPost.getPostId();
 
@@ -62,7 +62,7 @@ public class PostServiceImpl implements PostService {
             saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
         }
         if (surveyReq != null) {
-            saveSurveyAndSurveyQuestion(surveyReq, postId);
+            saveSurveyAndSurveyQuestion(surveyReq, postId, false);
         }
     }
 
@@ -163,7 +163,7 @@ public class PostServiceImpl implements PostService {
             saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
         }
         if (surveyReq != null) {
-            saveSurveyAndSurveyQuestion(surveyReq, postId);
+            saveSurveyAndSurveyQuestion(surveyReq, postId, true);
         }
     }
 
@@ -176,7 +176,7 @@ public class PostServiceImpl implements PostService {
     /**
      * 추출 메서드
      **/
-    private Post savePost(RegistPostReq req) {
+    private Post savePost(AddPostReq req) {
         Post post = new Post();
         BeanUtils.copyProperties(req, post);
 
@@ -206,9 +206,9 @@ public class PostServiceImpl implements PostService {
 
     private void saveToDB(JpaRepository repository, String saveFileName, String uploadFileName, String ext, long postId) {
         if (repository instanceof AttachedFileRepository) {
-            repository.save(new AttachedFile(saveFileName, uploadFileName, ext, postId));
+            repository.save(new AttachedFile(saveFileName, uploadFileName, ext, postId, null));
         } else if (repository instanceof ImgFileRepository) {
-            repository.save(new ImgFile(saveFileName, uploadFileName, ext, postId));
+            repository.save(new ImgFile(saveFileName, uploadFileName, ext, postId, null));
         }
     }
 
@@ -217,13 +217,16 @@ public class PostServiceImpl implements PostService {
         file.transferTo(new File(fullPath));
     }
 
-    private void saveSurveyAndSurveyQuestion(SurveyReq surveyReq, long postId) {
-        Survey savedSurvey = saveSurvey(surveyReq.getTitle(), postId);
+    private void saveSurveyAndSurveyQuestion(SurveyReq surveyReq, long postId, boolean isUpdating) {
+        Survey savedSurvey = saveSurvey(surveyReq.getTitle(), postId, isUpdating);
         saveSurveyQuestion(surveyReq.getSurveyQuestionReqList(), savedSurvey.getSurveyId());
     }
 
-    private Survey saveSurvey(String title, long postId) {
+    private Survey saveSurvey(String title, long postId, boolean isUpdating) {
         Survey survey = new Survey(title, postId);
+        if (isUpdating) {
+            survey.setModifyDatetime(null);
+        }
 
         return surveyRepository.save(survey);
     }
@@ -256,6 +259,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findByPostId(postId);
         post.setTitle(req.getTitle());
         post.setContent(req.getContent());
+        post.setModifyDatetime(null);
         postRepository.save(post);
     }
 

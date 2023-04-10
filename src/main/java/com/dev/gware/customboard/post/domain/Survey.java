@@ -23,8 +23,11 @@ public class Survey {
     @Column(name = "TITLE")
     String title;
 
-    @Column(name = "REGISTRATION_TIME")
-    String registrationTime;
+    @Column(name = "CREATE_DATETIME")
+    String createDatetime;
+
+    @Column(name = "MODIFY_DATETIME")
+    String modifyDatetime;
 
     @NonNull
     @Column(name = "POST_ID")

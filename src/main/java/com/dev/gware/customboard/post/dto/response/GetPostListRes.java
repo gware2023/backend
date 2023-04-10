@@ -11,7 +11,7 @@ public class GetPostListRes {
     long postId;
     String title;
     String userName;
-    String time;
+    String createDatetime;
     long viewCount;
     long recommendationCount;
 }

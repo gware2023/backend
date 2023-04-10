@@ -14,4 +14,5 @@ public class GetSurveyRes {
     long surveyId;
     String title;
     List<SurveyQuestionRes> surveyQuestionResList;
+    List<Long> questionIdListVotedByUser;
 }

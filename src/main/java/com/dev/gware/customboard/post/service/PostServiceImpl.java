@@ -40,6 +40,8 @@ public class PostServiceImpl implements PostService {
     @Autowired
     SurveyQuestionRepository surveyQuestionRepository;
     @Autowired
+    SurveyVoteRepository surveyVoteRepository;
+    @Autowired
     UserMapper userMapper;
 
     @Value("${attached.file.dir}")
@@ -117,14 +119,20 @@ public class PostServiceImpl implements PostService {
     public GetSurveyRes getSurvey(long postId) {
         Survey survey = surveyRepository.findByPostId(postId);
         List<SurveyQuestion> surveyQuestionList = surveyQuestionRepository.findBySurveyId(survey.getSurveyId());
+        long dummyUserId = 1L;
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(survey.getSurveyId(), dummyUserId);
 
         GetSurveyRes res = new GetSurveyRes();
         res.setSurveyQuestionResList(new ArrayList<>());
+        res.setQuestionIdListVotedByUser(new ArrayList<>());
         BeanUtils.copyProperties(survey, res);
         for (SurveyQuestion surveyQuestion : surveyQuestionList) {
             SurveyQuestionRes surveyQuestionRes = new SurveyQuestionRes();
             BeanUtils.copyProperties(surveyQuestion, surveyQuestionRes);
             res.getSurveyQuestionResList().add(surveyQuestionRes);
+        }
+        for (SurveyVote surveyVote : surveyVoteList) {
+            res.getQuestionIdListVotedByUser().add(surveyVote.getQuestionId());
         }
 
         return res;

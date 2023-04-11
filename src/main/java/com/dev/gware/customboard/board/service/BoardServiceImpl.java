@@ -4,17 +4,17 @@ import com.dev.gware.customboard.board.domain.Board;
 import com.dev.gware.customboard.board.dto.request.AddBoardReq;
 import com.dev.gware.customboard.board.dto.response.GetBoardListRes;
 import com.dev.gware.customboard.board.repository.BoardRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
 
-    @Autowired
-    BoardRepository boardRepository;
+    private final BoardRepository boardRepository;
 
     @Override
     public void addBoard(AddBoardReq req) {

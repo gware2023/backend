@@ -4,17 +4,18 @@ import com.dev.gware.customboard.board.domain.Board;
 import com.dev.gware.customboard.board.dto.request.AddBoardReq;
 import com.dev.gware.customboard.board.dto.response.GetBoardListRes;
 import com.dev.gware.customboard.board.repository.BoardRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
 
-    @Autowired
-    BoardRepository boardRepository;
+    private final BoardRepository boardRepository;
 
     @Override
     public void addBoard(AddBoardReq req) {
@@ -24,12 +25,16 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public GetBoardListRes getBoardList() {
+    public List<GetBoardListRes> getBoardList() {
         List<Board> boardList = boardRepository.findAll();
-        GetBoardListRes res = new GetBoardListRes();
-        res.setBoardList(boardList);
+        List<GetBoardListRes> resList = new ArrayList<>();
+        for (Board board : boardList) {
+            GetBoardListRes res = new GetBoardListRes();
+            BeanUtils.copyProperties(board, res);
+            resList.add(res);
+        }
 
-        return res;
+        return resList;
     }
 
     @Override

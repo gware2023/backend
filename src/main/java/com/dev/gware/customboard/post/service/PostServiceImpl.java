@@ -1,14 +1,17 @@
 package com.dev.gware.customboard.post.service;
 
 import com.dev.gware.customboard.post.domain.*;
-import com.dev.gware.customboard.post.dto.request.*;
+import com.dev.gware.customboard.post.dto.request.AddPostReq;
+import com.dev.gware.customboard.post.dto.request.GetPostListReq;
+import com.dev.gware.customboard.post.dto.request.SurveyReq;
+import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
 import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionReq;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.dto.response.element.SurveyQuestionRes;
 import com.dev.gware.customboard.post.repository.*;
 import com.dev.gware.user.mapper.UserMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -27,22 +30,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
-    @Autowired
-    PostRepository postRepository;
-    @Autowired
-    AttachedFileRepository attachedFileRepository;
-    @Autowired
-    ImgFileRepository imgFileRepository;
-    @Autowired
-    SurveyRepository surveyRepository;
-    @Autowired
-    SurveyQuestionRepository surveyQuestionRepository;
-    @Autowired
-    SurveyVoteRepository surveyVoteRepository;
-    @Autowired
-    UserMapper userMapper;
+    private final PostRepository postRepository;
+    private final AttachedFileRepository attachedFileRepository;
+    private final ImgFileRepository imgFileRepository;
+    private final SurveyRepository surveyRepository;
+    private final SurveyQuestionRepository surveyQuestionRepository;
+    private final SurveyVoteRepository surveyVoteRepository;
+    private final UserMapper userMapper;
 
     @Value("${attached.file.dir}")
     private String attachedFileDir;
@@ -116,33 +113,26 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public GetSurveyRes getSurvey(long postId) {
+    public GetSurveyRes getSurvey(long postId, long userId) {
         Survey survey = surveyRepository.findByPostId(postId);
         List<SurveyQuestion> surveyQuestionList = surveyQuestionRepository.findBySurveyId(survey.getSurveyId());
-        long dummyUserId = 1L;
-        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(survey.getSurveyId(), dummyUserId);
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(survey.getSurveyId(), userId);
 
         GetSurveyRes res = new GetSurveyRes();
         res.setSurveyQuestionResList(new ArrayList<>());
         res.setQuestionIdListVotedByUser(new ArrayList<>());
-        BeanUtils.copyProperties(survey, res);
-        for (SurveyQuestion surveyQuestion : surveyQuestionList) {
-            SurveyQuestionRes surveyQuestionRes = new SurveyQuestionRes();
-            BeanUtils.copyProperties(surveyQuestion, surveyQuestionRes);
-            res.getSurveyQuestionResList().add(surveyQuestionRes);
-        }
-        for (SurveyVote surveyVote : surveyVoteList) {
-            res.getQuestionIdListVotedByUser().add(surveyVote.getQuestionId());
-        }
+
+        copyToGetSurveyRes(survey, surveyQuestionList, surveyVoteList, res);
 
         return res;
     }
+
 
     @Override
     public List<GetPostListRes> getPostList(GetPostListReq req) {
         Page<Post> postPage = findPostPage(req);
 
-        List<GetPostListRes> resList = copyToResList(postPage);
+        List<GetPostListRes> resList = copyToGetPostListRes(postPage);
 
         return resList;
     }
@@ -244,7 +234,7 @@ public class PostServiceImpl implements PostService {
         return postRepository.findByBoardId(req.getBoardId(), pageRequest);
     }
 
-    private List<GetPostListRes> copyToResList(Page<Post> postPage) {
+    private List<GetPostListRes> copyToGetPostListRes(Page<Post> postPage) {
         List<GetPostListRes> resList = new ArrayList<>();
         for (Post post : postPage) {
             GetPostListRes res = new GetPostListRes();
@@ -289,6 +279,18 @@ public class PostServiceImpl implements PostService {
             attachedFileRepository.deleteByPostId(postId);
         } else if (repository instanceof ImgFileRepository) {
             imgFileRepository.deleteByPostId(postId);
+        }
+    }
+
+    private void copyToGetSurveyRes(Survey survey, List<SurveyQuestion> surveyQuestionList, List<SurveyVote> surveyVoteList, GetSurveyRes res) {
+        BeanUtils.copyProperties(survey, res);
+        for (SurveyQuestion surveyQuestion : surveyQuestionList) {
+            SurveyQuestionRes surveyQuestionRes = new SurveyQuestionRes();
+            BeanUtils.copyProperties(surveyQuestion, surveyQuestionRes);
+            res.getSurveyQuestionResList().add(surveyQuestionRes);
+        }
+        for (SurveyVote surveyVote : surveyVoteList) {
+            res.getQuestionIdListVotedByUser().add(surveyVote.getQuestionId());
         }
     }
 }

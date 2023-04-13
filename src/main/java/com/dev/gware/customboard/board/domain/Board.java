@@ -25,6 +25,6 @@ public class Board {
     @Column(name = "NAME")
     String name;
 
-    @Column(name = "TIME")
-    String time;
+    @Column(name = "CREATE_DATETIME")
+    String createDatetime;
 }

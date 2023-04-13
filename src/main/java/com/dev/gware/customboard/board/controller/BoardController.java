@@ -3,16 +3,18 @@ package com.dev.gware.customboard.board.controller;
 import com.dev.gware.customboard.board.dto.request.AddBoardReq;
 import com.dev.gware.customboard.board.dto.response.GetBoardListRes;
 import com.dev.gware.customboard.board.service.BoardService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/boards")
+@RequiredArgsConstructor
 public class BoardController {
 
-    @Autowired
-    BoardService boardService;
+    private final BoardService boardService;
 
     @PostMapping
     public ResponseEntity<Object> addBoard(@RequestBody AddBoardReq req) {
@@ -25,9 +27,9 @@ public class BoardController {
     @GetMapping
     public ResponseEntity<Object> getBoardList() {
 
-        GetBoardListRes res = boardService.getBoardList();
+        List<GetBoardListRes> resList = boardService.getBoardList();
 
-        return ResponseEntity.ok().body(res);
+        return ResponseEntity.ok().body(resList);
     }
 
     @DeleteMapping("/{boardId}")

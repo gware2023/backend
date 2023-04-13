@@ -22,7 +22,7 @@ public interface PostService {
 
     UrlResource downloadImgFile(String storeFileName) throws MalformedURLException;
 
-    GetSurveyRes getSurvey(long postId);
+    GetSurveyRes getSurvey(long postId, long userId);
 
     List<GetPostListRes> getPostList(GetPostListReq req);
 

@@ -1,17 +1,19 @@
 package com.dev.gware.customboard.post.controller;
 
-import com.dev.gware.customboard.post.dto.request.GetPostListReq;
+import com.dev.gware.auth.domain.AuthUser;
 import com.dev.gware.customboard.post.dto.request.AddPostReq;
+import com.dev.gware.customboard.post.dto.request.GetPostListReq;
 import com.dev.gware.customboard.post.dto.request.SurveyReq;
 import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.repository.AttachedFileRepository;
 import com.dev.gware.customboard.post.service.PostService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,19 +29,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
+@RequiredArgsConstructor
 @Validated
 public class PostController {
 
-    @Autowired
-    PostService postService;
-    @Autowired
-    AttachedFileRepository attachedFileRepository;
+    private final PostService postService;
+    private final AttachedFileRepository attachedFileRepository;
 
     @PostMapping
     public ResponseEntity<Object> addPost(@RequestPart @Valid AddPostReq req,
-                                             @RequestPart @Nullable List<MultipartFile> attachedFiles,
-                                             @RequestPart @Nullable List<MultipartFile> imgFiles,
-                                             @RequestPart @Nullable @Valid SurveyReq surveyReq) throws IOException {
+                                          @RequestPart @Nullable List<MultipartFile> attachedFiles,
+                                          @RequestPart @Nullable List<MultipartFile> imgFiles,
+                                          @RequestPart @Nullable @Valid SurveyReq surveyReq) throws IOException {
 
         postService.addPost(req, attachedFiles, imgFiles, surveyReq);
 
@@ -92,10 +93,11 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/survey")
-    public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId) {
+    public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId, @AuthenticationPrincipal AuthUser authUser) {
 
-        //TODO 요청한 유저의 투표 여부 추가
-        GetSurveyRes res = postService.getSurvey(postId);
+        long userId = authUser.getUsrKey();
+
+        GetSurveyRes res = postService.getSurvey(postId, userId);
 
         return ResponseEntity.ok().body(res);
     }
@@ -128,3 +130,4 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 }
+

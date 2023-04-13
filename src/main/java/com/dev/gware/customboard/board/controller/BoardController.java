@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/boards")
 @RequiredArgsConstructor
@@ -25,9 +27,9 @@ public class BoardController {
     @GetMapping
     public ResponseEntity<Object> getBoardList() {
 
-        GetBoardListRes res = boardService.getBoardList();
+        List<GetBoardListRes> resList = boardService.getBoardList();
 
-        return ResponseEntity.ok().body(res);
+        return ResponseEntity.ok().body(resList);
     }
 
     @DeleteMapping("/{boardId}")

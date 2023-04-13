@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,12 +25,16 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public GetBoardListRes getBoardList() {
+    public List<GetBoardListRes> getBoardList() {
         List<Board> boardList = boardRepository.findAll();
-        GetBoardListRes res = new GetBoardListRes();
-        res.setBoardList(boardList);
+        List<GetBoardListRes> resList = new ArrayList<>();
+        for (Board board : boardList) {
+            GetBoardListRes res = new GetBoardListRes();
+            BeanUtils.copyProperties(board, res);
+            resList.add(res);
+        }
 
-        return res;
+        return resList;
     }
 
     @Override

@@ -94,8 +94,9 @@ public class PostController {
 
     @GetMapping("/{postId}/survey")
     public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId, @AuthenticationPrincipal AuthUser authUser) {
+
         long userId = authUser.getUsrKey();
-        //TODO 요청한 유저의 투표 여부 추가
+
         GetSurveyRes res = postService.getSurvey(postId, userId);
 
         return ResponseEntity.ok().body(res);

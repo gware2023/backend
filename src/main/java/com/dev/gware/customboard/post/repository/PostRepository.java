@@ -16,4 +16,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Transactional
     void deleteByPostId(long postId);
+
+    Page<Post> findByBoardIdAndTitleContaining(long boardId, String title, Pageable pageable);
+
+    Page<Post> findByBoardIdAndContentContaining(long boardId, String content, Pageable pageable);
+
+    Page<Post> findByBoardIdAndUserId(long boardId, long userId, Pageable pageable);
 }

@@ -1,10 +1,7 @@
 package com.dev.gware.customboard.post.service;
 
 import com.dev.gware.customboard.post.domain.*;
-import com.dev.gware.customboard.post.dto.request.AddPostReq;
-import com.dev.gware.customboard.post.dto.request.GetPostListReq;
-import com.dev.gware.customboard.post.dto.request.SurveyReq;
-import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
+import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionReq;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.dto.response.element.SurveyQuestionRes;
@@ -160,6 +157,35 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePost(long postId) {
         postRepository.deleteByPostId(postId);
+    }
+
+    @Override
+    public List<SearchPostsRes> searchPosts(SearchPostsReq req) {
+        long boardId = req.getBoardId();
+        int type = req.getType();
+        int page = req.getPage();
+        String keyword = req.getKeyword();
+
+        PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.Direction.DESC, "postId");
+        Page<Post> postPage = null;
+        //0 : 글 제목, 1 : 글 내용, 2 : 작성자
+        if (type == 0) {
+            postPage = postRepository.findByBoardIdAndTitleContaining(boardId, keyword, pageRequest);
+        } else if (type == 1) {
+            postPage = postRepository.findByBoardIdAndContentContaining(boardId, keyword, pageRequest);
+        } else if (type == 2) {
+            int dummyUserId = 0;
+            postPage = postRepository.findByBoardIdAndUserId(boardId, dummyUserId, pageRequest);
+        }
+
+        List<SearchPostsRes> resList = new ArrayList<>();
+        for (Post post : postPage) {
+            SearchPostsRes res = new SearchPostsRes();
+            BeanUtils.copyProperties(post, res);
+            resList.add(res);
+        }
+
+        return resList;
     }
 
 

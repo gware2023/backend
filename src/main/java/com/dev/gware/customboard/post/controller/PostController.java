@@ -1,10 +1,7 @@
 package com.dev.gware.customboard.post.controller;
 
 import com.dev.gware.auth.domain.AuthUser;
-import com.dev.gware.customboard.post.dto.request.AddPostReq;
-import com.dev.gware.customboard.post.dto.request.GetPostListReq;
-import com.dev.gware.customboard.post.dto.request.SurveyReq;
-import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
+import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.repository.AttachedFileRepository;
 import com.dev.gware.customboard.post.service.PostService;
@@ -128,6 +125,14 @@ public class PostController {
         postService.deletePost(postId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchPosts(@RequestBody @Valid SearchPostsReq req) {
+
+        List<SearchPostsRes> resList = postService.searchPosts(req);
+
+        return ResponseEntity.ok().body(resList);
     }
 }
 

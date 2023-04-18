@@ -64,6 +64,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public GetPostRes getPost(long postId) {
         Post post = postRepository.findByPostId(postId);
+        post.setViewCount(post.getViewCount() + 1);
+        postRepository.save(post);
 
         GetPostRes res = new GetPostRes();
         BeanUtils.copyProperties(post, res);

@@ -31,4 +31,8 @@ public interface PostService {
     void deletePost(long postId);
 
     List<SearchPostsRes> searchPosts(SearchPostsReq req);
+
+    void recommendPost(long postId, Long usrKey);
+
+    void cancelPostRecommendation(long postId, Long usrKey);
 }

@@ -36,6 +36,7 @@ public class PostServiceImpl implements PostService {
     private final SurveyRepository surveyRepository;
     private final SurveyQuestionRepository surveyQuestionRepository;
     private final SurveyVoteRepository surveyVoteRepository;
+    private final PostRecommendationRepository postRecommendationRepository;
     private final UserMapper userMapper;
 
     @Value("${attached.file.dir}")
@@ -186,6 +187,31 @@ public class PostServiceImpl implements PostService {
         }
 
         return resList;
+    }
+
+    @Override
+    public void recommendPost(long postId, Long usrKey) {
+        PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, usrKey);
+        if (postRecommendation == null) {
+            postRecommendation = new PostRecommendation(postId, usrKey);
+            postRecommendationRepository.save(postRecommendation);
+
+            Post post = postRepository.findByPostId(postId);
+            post.setRecommendationCount(post.getRecommendationCount() + 1);
+            postRepository.save(post);
+        }
+    }
+
+    @Override
+    public void cancelPostRecommendation(long postId, Long usrKey) {
+        PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, usrKey);
+        if (postRecommendation != null) {
+            postRecommendationRepository.deleteByPostIdAndUserId(postId, usrKey);
+
+            Post post = postRepository.findByPostId(postId);
+            post.setRecommendationCount(post.getRecommendationCount() - 1);
+            postRepository.save(post);
+        }
     }
 
 

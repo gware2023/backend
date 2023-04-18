@@ -90,7 +90,8 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/survey")
-    public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId, @AuthenticationPrincipal AuthUser authUser) {
+    public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId,
+                                            @AuthenticationPrincipal AuthUser authUser) {
 
         long userId = authUser.getUsrKey();
 
@@ -133,6 +134,24 @@ public class PostController {
         List<SearchPostsRes> resList = postService.searchPosts(req);
 
         return ResponseEntity.ok().body(resList);
+    }
+
+    @PatchMapping("/{postId}/recommend")
+    public ResponseEntity<Object> recommendPost(@PathVariable @Min(1L) long postId,
+                                                @AuthenticationPrincipal AuthUser authUser) {
+
+        postService.recommendPost(postId, authUser.getUsrKey());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{postId}/cancel-recommendtion")
+    public ResponseEntity<Object> cancelRecommendationPost(@PathVariable @Min(1L) long postId,
+                                                           @AuthenticationPrincipal AuthUser authUser) {
+
+        postService.cancelPostRecommendation(postId, authUser.getUsrKey());
+
+        return ResponseEntity.ok().build();
     }
 }
 

@@ -12,12 +12,17 @@ import javax.validation.constraints.NotNull;
 @Setter
 @ToString
 public class AddPostReq {
+    @NotNull
     @Min(1L)
     long boardId;
+
     @NotBlank
     String title;
+
     @NotNull
     String content;
+
+    @NotNull
     @Min(1L)
     long userId;
 }

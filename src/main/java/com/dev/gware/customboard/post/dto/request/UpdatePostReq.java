@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 public class UpdatePostReq {
     @NotBlank
     String title;
+
     @NotNull
     String content;
 }

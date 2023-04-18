@@ -1,10 +1,7 @@
 package com.dev.gware.customboard.post.controller;
 
 import com.dev.gware.auth.domain.AuthUser;
-import com.dev.gware.customboard.post.dto.request.AddPostReq;
-import com.dev.gware.customboard.post.dto.request.GetPostListReq;
-import com.dev.gware.customboard.post.dto.request.SurveyReq;
-import com.dev.gware.customboard.post.dto.request.UpdatePostReq;
+import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.repository.AttachedFileRepository;
 import com.dev.gware.customboard.post.service.PostService;
@@ -93,7 +90,8 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/survey")
-    public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId, @AuthenticationPrincipal AuthUser authUser) {
+    public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId,
+                                            @AuthenticationPrincipal AuthUser authUser) {
 
         long userId = authUser.getUsrKey();
 
@@ -126,6 +124,32 @@ public class PostController {
     public ResponseEntity<Object> deletePost(@PathVariable @Min(1L) long postId) {
 
         postService.deletePost(postId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchPosts(@RequestBody @Valid SearchPostsReq req) {
+
+        List<SearchPostsRes> resList = postService.searchPosts(req);
+
+        return ResponseEntity.ok().body(resList);
+    }
+
+    @PatchMapping("/{postId}/recommend")
+    public ResponseEntity<Object> recommendPost(@PathVariable @Min(1L) long postId,
+                                                @AuthenticationPrincipal AuthUser authUser) {
+
+        postService.recommendPost(postId, authUser.getUsrKey());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{postId}/cancel-recommendtion")
+    public ResponseEntity<Object> cancelRecommendationPost(@PathVariable @Min(1L) long postId,
+                                                           @AuthenticationPrincipal AuthUser authUser) {
+
+        postService.cancelPostRecommendation(postId, authUser.getUsrKey());
 
         return ResponseEntity.ok().build();
     }

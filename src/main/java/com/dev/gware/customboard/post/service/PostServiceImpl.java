@@ -192,6 +192,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void recommendPost(long postId, Long usrKey) {
         PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, usrKey);
         if (postRecommendation == null) {
@@ -205,6 +206,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void cancelPostRecommendation(long postId, Long usrKey) {
         PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, usrKey);
         if (postRecommendation != null) {
@@ -214,6 +216,14 @@ public class PostServiceImpl implements PostService {
             post.setRecommendationCount(post.getRecommendationCount() - 1);
             postRepository.save(post);
         }
+    }
+
+    @Override
+    @Transactional
+    public void vote(long surveyId, VoteReq req, Long usrKey) {
+        deleteVoteInfos(surveyId, usrKey);
+
+        saveVoteInfos(surveyId, req, usrKey);
     }
 
 
@@ -345,6 +355,28 @@ public class PostServiceImpl implements PostService {
         }
         for (SurveyVote surveyVote : surveyVoteList) {
             res.getQuestionIdListVotedByUser().add(surveyVote.getQuestionId());
+        }
+    }
+
+    private void deleteVoteInfos(long surveyId, Long usrKey) {
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(surveyId, usrKey);
+        for (SurveyVote surveyVote : surveyVoteList) {
+            SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(surveyVote.getQuestionId());
+            surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() - 1);
+            surveyQuestionRepository.save(surveyQuestion);
+        }
+        surveyVoteRepository.deleteAllBySurveyIdAndUserId(surveyId, usrKey);
+    }
+
+    private void saveVoteInfos(long surveyId, VoteReq req, Long usrKey) {
+        List<Long> votedQuestionIdList = req.getVotedQuestionIdList();
+        for (Long questionId : votedQuestionIdList) {
+            SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(questionId);
+            surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() + 1);
+            surveyQuestionRepository.save(surveyQuestion);
+
+            SurveyVote surveyVote = new SurveyVote(surveyId, questionId, usrKey);
+            surveyVoteRepository.save(surveyVote);
         }
     }
 }

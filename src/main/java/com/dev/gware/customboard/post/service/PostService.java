@@ -10,7 +10,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 public interface PostService {
-    void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException;
+    void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException;
 
     GetPostRes getPost(long postId);
 
@@ -28,7 +28,7 @@ public interface PostService {
 
     void updatePost(long postId, UpdatePostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException;
 
-    void deletePost(long postId);
+    void deletePost(long postId, long userId);
 
     List<SearchPostsRes> searchPosts(SearchPostsReq req);
 
@@ -36,5 +36,5 @@ public interface PostService {
 
     void cancelPostRecommendation(long postId, Long usrKey);
 
-    void vote(long surveyId, VoteReq req, Long usrKey);
+    void vote(VoteReq req, Long usrKey);
 }

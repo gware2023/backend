@@ -1,4 +1,4 @@
-package com.dev.gware.customboard.post.domain;
+package com.dev.gware.customboard.comment.domain;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -6,18 +6,25 @@ import org.hibernate.annotations.DynamicInsert;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "POST_RECOMMENDATION")
+@Table(name = "COMMENT")
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @RequiredArgsConstructor
 @DynamicInsert
-public class PostRecommendation {
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "POST_RECOMMENDATION_ID")
-    long postRecommendationId;
+    @Column(name = "COMMENT_ID")
+    long commentId;
+
+    @NonNull
+    @Column(name = "CONTENT")
+    String content;
+
+    @Column(name = "CREATE_DATETIME")
+    String createDatetime;
 
     @NonNull
     @Column(name = "POST_ID")
@@ -27,6 +34,7 @@ public class PostRecommendation {
     @Column(name = "USER_ID")
     long userId;
 
-    @Column(name = "RECOMMEND_DATETIME")
-    String recommendDatetime;
+    @NonNull
+    @Column(name = "USER_NAME")
+    String userName;
 }

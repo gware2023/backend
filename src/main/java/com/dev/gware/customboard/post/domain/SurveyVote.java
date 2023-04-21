@@ -1,11 +1,9 @@
 package com.dev.gware.customboard.post.domain;
 
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "SURVEY_VOTE")
@@ -14,9 +12,12 @@ import javax.persistence.Table;
 @ToString
 @NoArgsConstructor
 @RequiredArgsConstructor
+@DynamicInsert
 public class SurveyVote {
     @Id
-    long dummyPK;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "SURVEY_VOTE_ID")
+    long surveyVoteId;
 
     @NonNull
     @Column(name = "SURVEY_ID")

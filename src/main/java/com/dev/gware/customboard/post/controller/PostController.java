@@ -37,9 +37,10 @@ public class PostController {
     public ResponseEntity<Object> addPost(@RequestPart @Valid AddPostReq req,
                                           @RequestPart @Nullable List<MultipartFile> attachedFiles,
                                           @RequestPart @Nullable List<MultipartFile> imgFiles,
-                                          @RequestPart @Nullable @Valid SurveyReq surveyReq) throws IOException {
+                                          @RequestPart @Nullable @Valid SurveyReq surveyReq,
+                                          @AuthenticationPrincipal AuthUser authUser) throws IOException {
 
-        postService.addPost(req, attachedFiles, imgFiles, surveyReq);
+        postService.addPost(req, attachedFiles, imgFiles, surveyReq, authUser.getUsrKey());
 
         return ResponseEntity.ok().build();
     }
@@ -121,9 +122,10 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Object> deletePost(@PathVariable @Min(1L) long postId) {
+    public ResponseEntity<Object> deletePost(@PathVariable @Min(1L) long postId,
+                                             @AuthenticationPrincipal AuthUser authUser) {
 
-        postService.deletePost(postId);
+        postService.deletePost(postId, authUser.getUsrKey());
 
         return ResponseEntity.ok().build();
     }
@@ -145,7 +147,7 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{postId}/cancel-recommendtion")
+    @PatchMapping("/{postId}/cancel-recommendation")
     public ResponseEntity<Object> cancelRecommendationPost(@PathVariable @Min(1L) long postId,
                                                            @AuthenticationPrincipal AuthUser authUser) {
 
@@ -154,12 +156,11 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{surveyId}/vote")
-    public ResponseEntity<Object> vote(@PathVariable @Min(1L) long surveyId,
-                                       @RequestBody VoteReq req,
+    @PatchMapping("/vote")
+    public ResponseEntity<Object> vote(@RequestBody VoteReq req,
                                        @AuthenticationPrincipal AuthUser authUser) {
 
-        postService.vote(surveyId, req, authUser.getUsrKey());
+        postService.vote(req, authUser.getUsrKey());
 
         return ResponseEntity.ok().build();
     }

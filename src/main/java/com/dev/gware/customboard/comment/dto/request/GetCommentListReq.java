@@ -1,24 +1,17 @@
-package com.dev.gware.customboard.post.dto.request;
+package com.dev.gware.customboard.comment.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
 @ToString
-public class AddPostReq {
+public class GetCommentListReq {
     @NotNull
     @Min(1L)
-    long boardId;
-
-    @NotBlank
-    String title;
-
-    @NotNull
-    String content;
+    long postId;
 }

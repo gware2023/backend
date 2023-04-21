@@ -191,10 +191,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void recommendPost(long postId, Long usrKey) {
-        PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, usrKey);
+    public void recommendPost(long postId, Long userId) {
+        PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, userId);
         if (postRecommendation == null) {
-            postRecommendation = new PostRecommendation(postId, usrKey);
+            postRecommendation = new PostRecommendation(postId, userId);
             postRecommendationRepository.save(postRecommendation);
 
             Post post = postRepository.findByPostId(postId);
@@ -205,10 +205,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void cancelPostRecommendation(long postId, Long usrKey) {
-        PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, usrKey);
+    public void cancelPostRecommendation(long postId, Long userId) {
+        PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, userId);
         if (postRecommendation != null) {
-            postRecommendationRepository.deleteByPostIdAndUserId(postId, usrKey);
+            postRecommendationRepository.deleteByPostIdAndUserId(postId, userId);
 
             Post post = postRepository.findByPostId(postId);
             post.setRecommendationCount(post.getRecommendationCount() - 1);
@@ -218,10 +218,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void vote(long surveyId, VoteReq req, Long usrKey) {
-        deleteVoteInfos(surveyId, usrKey);
+    public void vote(long surveyId, VoteReq req, Long userId) {
+        deleteVoteInfos(surveyId, userId);
 
-        saveVoteInfos(surveyId, req, usrKey);
+        saveVoteInfos(surveyId, req, userId);
     }
 
 
@@ -358,24 +358,24 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private void deleteVoteInfos(long surveyId, Long usrKey) {
-        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(surveyId, usrKey);
+    private void deleteVoteInfos(long surveyId, Long userId) {
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(surveyId, userId);
         for (SurveyVote surveyVote : surveyVoteList) {
             SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(surveyVote.getQuestionId());
             surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() - 1);
             surveyQuestionRepository.save(surveyQuestion);
         }
-        surveyVoteRepository.deleteAllBySurveyIdAndUserId(surveyId, usrKey);
+        surveyVoteRepository.deleteAllBySurveyIdAndUserId(surveyId, userId);
     }
 
-    private void saveVoteInfos(long surveyId, VoteReq req, Long usrKey) {
+    private void saveVoteInfos(long surveyId, VoteReq req, Long userId) {
         List<Long> votedQuestionIdList = req.getVotedQuestionIdList();
         for (Long questionId : votedQuestionIdList) {
             SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(questionId);
             surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() + 1);
             surveyQuestionRepository.save(surveyQuestion);
 
-            SurveyVote surveyVote = new SurveyVote(surveyId, questionId, usrKey);
+            SurveyVote surveyVote = new SurveyVote(surveyId, questionId, userId);
             surveyVoteRepository.save(surveyVote);
         }
     }

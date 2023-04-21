@@ -3,10 +3,7 @@ package com.dev.gware.customboard.post.domain;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "POST_RECOMMENDATION")
@@ -18,7 +15,9 @@ import javax.persistence.Table;
 @DynamicInsert
 public class PostRecommendation {
     @Id
-    long dummyPK;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "POST_RECOMMENDATION_ID")
+    long postRecommendationId;
 
     @NonNull
     @Column(name = "POST_ID")
@@ -28,6 +27,6 @@ public class PostRecommendation {
     @Column(name = "USER_ID")
     long userId;
 
-    @Column(name = "CREATE_DATETIME")
-    String createDatetime;
+    @Column(name = "RECOMMEND_DATETIME")
+    String recommendDatetime;
 }

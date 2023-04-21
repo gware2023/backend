@@ -146,7 +146,7 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{postId}/cancel-recommendtion")
+    @PatchMapping("/{postId}/cancel-recommendation")
     public ResponseEntity<Object> cancelRecommendationPost(@PathVariable @Min(1L) long postId,
                                                            @AuthenticationPrincipal AuthUser authUser) {
 

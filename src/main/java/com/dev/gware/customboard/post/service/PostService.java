@@ -28,7 +28,7 @@ public interface PostService {
 
     void updatePost(long postId, UpdatePostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException;
 
-    void deletePost(long postId);
+    void deletePost(long postId, long userId);
 
     List<SearchPostsRes> searchPosts(SearchPostsReq req);
 

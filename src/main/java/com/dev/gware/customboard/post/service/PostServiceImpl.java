@@ -69,7 +69,6 @@ public class PostServiceImpl implements PostService {
 
         GetPostRes res = new GetPostRes();
         BeanUtils.copyProperties(post, res);
-        res.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
 
         return res;
     }
@@ -177,8 +176,7 @@ public class PostServiceImpl implements PostService {
         } else if (type == 1) {
             postPage = postRepository.findByBoardIdAndContentContaining(boardId, keyword, pageRequest);
         } else if (type == 2) {
-            int dummyUserId = 0;
-            postPage = postRepository.findByBoardIdAndUserId(boardId, dummyUserId, pageRequest);
+            postPage = postRepository.findByBoardIdAndUserName(boardId, keyword, pageRequest);
         }
 
         List<SearchPostsRes> resList = new ArrayList<>();
@@ -192,6 +190,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void recommendPost(long postId, Long usrKey) {
         PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, usrKey);
         if (postRecommendation == null) {
@@ -205,6 +204,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void cancelPostRecommendation(long postId, Long usrKey) {
         PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, usrKey);
         if (postRecommendation != null) {
@@ -216,6 +216,14 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    @Override
+    @Transactional
+    public void vote(long surveyId, VoteReq req, Long usrKey) {
+        deleteVoteInfos(surveyId, usrKey);
+
+        saveVoteInfos(surveyId, req, usrKey);
+    }
+
 
     /**
      * 추출 메서드
@@ -223,6 +231,8 @@ public class PostServiceImpl implements PostService {
     private Post savePost(AddPostReq req) {
         Post post = new Post();
         BeanUtils.copyProperties(req, post);
+        String userName = userMapper.findByKey(post.getUserId()).getKorNm();
+        post.setUserName(userName);
 
         return postRepository.save(post);
     }
@@ -293,7 +303,6 @@ public class PostServiceImpl implements PostService {
         for (Post post : postPage) {
             GetPostListRes res = new GetPostListRes();
             BeanUtils.copyProperties(post, res);
-            res.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
             resList.add(res);
         }
         return resList;
@@ -345,6 +354,28 @@ public class PostServiceImpl implements PostService {
         }
         for (SurveyVote surveyVote : surveyVoteList) {
             res.getQuestionIdListVotedByUser().add(surveyVote.getQuestionId());
+        }
+    }
+
+    private void deleteVoteInfos(long surveyId, Long usrKey) {
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(surveyId, usrKey);
+        for (SurveyVote surveyVote : surveyVoteList) {
+            SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(surveyVote.getQuestionId());
+            surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() - 1);
+            surveyQuestionRepository.save(surveyQuestion);
+        }
+        surveyVoteRepository.deleteAllBySurveyIdAndUserId(surveyId, usrKey);
+    }
+
+    private void saveVoteInfos(long surveyId, VoteReq req, Long usrKey) {
+        List<Long> votedQuestionIdList = req.getVotedQuestionIdList();
+        for (Long questionId : votedQuestionIdList) {
+            SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(questionId);
+            surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() + 1);
+            surveyQuestionRepository.save(surveyQuestion);
+
+            SurveyVote surveyVote = new SurveyVote(surveyId, questionId, usrKey);
+            surveyVoteRepository.save(surveyVote);
         }
     }
 }

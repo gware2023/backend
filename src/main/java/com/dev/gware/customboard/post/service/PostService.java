@@ -36,5 +36,5 @@ public interface PostService {
 
     void cancelPostRecommendation(long postId, Long usrKey);
 
-    void vote(long surveyId, VoteReq req, Long usrKey);
+    void vote(VoteReq req, Long usrKey);
 }

@@ -155,12 +155,11 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{surveyId}/vote")
-    public ResponseEntity<Object> vote(@PathVariable @Min(1L) long surveyId,
-                                       @RequestBody VoteReq req,
+    @PatchMapping("/vote")
+    public ResponseEntity<Object> vote(@RequestBody VoteReq req,
                                        @AuthenticationPrincipal AuthUser authUser) {
 
-        postService.vote(surveyId, req, authUser.getUsrKey());
+        postService.vote(req, authUser.getUsrKey());
 
         return ResponseEntity.ok().build();
     }

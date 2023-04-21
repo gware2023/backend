@@ -218,10 +218,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void vote(long surveyId, VoteReq req, Long userId) {
-        deleteVoteInfos(surveyId, userId);
+    public void vote(VoteReq req, Long userId) {
+        deleteVoteInfos(req.getSurveyId(), userId);
 
-        saveVoteInfos(surveyId, req, userId);
+        saveVoteInfos(req, userId);
     }
 
 
@@ -368,14 +368,14 @@ public class PostServiceImpl implements PostService {
         surveyVoteRepository.deleteAllBySurveyIdAndUserId(surveyId, userId);
     }
 
-    private void saveVoteInfos(long surveyId, VoteReq req, Long userId) {
+    private void saveVoteInfos(VoteReq req, Long userId) {
         List<Long> votedQuestionIdList = req.getVotedQuestionIdList();
         for (Long questionId : votedQuestionIdList) {
             SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(questionId);
             surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() + 1);
             surveyQuestionRepository.save(surveyQuestion);
 
-            SurveyVote surveyVote = new SurveyVote(surveyId, questionId, userId);
+            SurveyVote surveyVote = new SurveyVote(req.getSurveyId(), questionId, userId);
             surveyVoteRepository.save(surveyVote);
         }
     }

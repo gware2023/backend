@@ -46,8 +46,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException {
-        Post savedPost = savePost(req);
+    public void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException {
+        Post savedPost = savePost(req, userId);
         long postId = savedPost.getPostId();
 
         if (attachedFiles != null) {
@@ -228,9 +228,10 @@ public class PostServiceImpl implements PostService {
     /**
      * 추출 메서드
      **/
-    private Post savePost(AddPostReq req) {
+    private Post savePost(AddPostReq req, long userId) {
         Post post = new Post();
         BeanUtils.copyProperties(req, post);
+        post.setUserId(userId);
         String userName = userMapper.findByKey(post.getUserId()).getKorNm();
         post.setUserName(userName);
 

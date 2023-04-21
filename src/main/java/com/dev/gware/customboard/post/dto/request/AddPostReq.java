@@ -21,8 +21,4 @@ public class AddPostReq {
 
     @NotNull
     String content;
-
-    @NotNull
-    @Min(1L)
-    long userId;
 }

@@ -37,9 +37,10 @@ public class PostController {
     public ResponseEntity<Object> addPost(@RequestPart @Valid AddPostReq req,
                                           @RequestPart @Nullable List<MultipartFile> attachedFiles,
                                           @RequestPart @Nullable List<MultipartFile> imgFiles,
-                                          @RequestPart @Nullable @Valid SurveyReq surveyReq) throws IOException {
+                                          @RequestPart @Nullable @Valid SurveyReq surveyReq,
+                                          @AuthenticationPrincipal AuthUser authUser) throws IOException {
 
-        postService.addPost(req, attachedFiles, imgFiles, surveyReq);
+        postService.addPost(req, attachedFiles, imgFiles, surveyReq, authUser.getUsrKey());
 
         return ResponseEntity.ok().build();
     }

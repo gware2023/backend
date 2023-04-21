@@ -69,7 +69,6 @@ public class PostServiceImpl implements PostService {
 
         GetPostRes res = new GetPostRes();
         BeanUtils.copyProperties(post, res);
-        res.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
 
         return res;
     }
@@ -177,8 +176,7 @@ public class PostServiceImpl implements PostService {
         } else if (type == 1) {
             postPage = postRepository.findByBoardIdAndContentContaining(boardId, keyword, pageRequest);
         } else if (type == 2) {
-            int dummyUserId = 0;
-            postPage = postRepository.findByBoardIdAndUserId(boardId, dummyUserId, pageRequest);
+            postPage = postRepository.findByBoardIdAndUserName(boardId, keyword, pageRequest);
         }
 
         List<SearchPostsRes> resList = new ArrayList<>();
@@ -233,6 +231,8 @@ public class PostServiceImpl implements PostService {
     private Post savePost(AddPostReq req) {
         Post post = new Post();
         BeanUtils.copyProperties(req, post);
+        String userName = userMapper.findByKey(post.getUserId()).getKorNm();
+        post.setUserName(userName);
 
         return postRepository.save(post);
     }
@@ -303,7 +303,6 @@ public class PostServiceImpl implements PostService {
         for (Post post : postPage) {
             GetPostListRes res = new GetPostListRes();
             BeanUtils.copyProperties(post, res);
-            res.setUserName(userMapper.findByKey(post.getUserId()).getKorNm());
             resList.add(res);
         }
         return resList;

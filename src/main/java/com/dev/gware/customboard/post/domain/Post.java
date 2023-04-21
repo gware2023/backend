@@ -35,6 +35,10 @@ public class Post {
     @Column(name = "USER_ID")
     long userId;
 
+    @NonNull
+    @Column(name = "USER_NAME")
+    String userName;
+
     @Column(name = "CREATE_DATETIME")
     String createDatetime;
 

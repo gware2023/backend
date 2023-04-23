@@ -1,0 +1,275 @@
+ifndef::snippets[]
+:snippets: ./build/generated-snippets
+endif::[]
+
+= GWARE API
+:sectnums:
+:toc: left
+:toclevels: 4
+:toc-title: Table of Contents
+:source-highlighter: prettify
+
+== User
+
+== Board
+=== 게시판 등록
+DESCRIPTION
+```
+
+```
+REQUEST
+
+include::{snippets}/addBoard/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/addBoard/http-response.adoc[]
+
+=== 게시판 목록 조회
+DESCRIPTION
+```
+
+```
+REQUEST
+
+include::{snippets}/getBoardList/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/getBoardList/http-response.adoc[]
+
+=== 게시판 삭제
+DESCRIPTION
+```
+/api/boards/{boardId}
+```
+REQUEST
+
+include::{snippets}/deleteBoard/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/deleteBoard/http-response.adoc[]
+
+== Post
+=== 게시글 등록
+DESCRIPTION
+```
+req 필수
+attachedFiles 선택
+imgFiles 선택
+surveyReq 선택
+```
+REQUEST
+
+include::{snippets}/addPost/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/addPost/http-response.adoc[]
+
+=== 게시글 조회
+DESCRIPTION
+```
+/api/posts/{postId}
+```
+REQUEST
+
+include::{snippets}/getPost/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/getPost/http-response.adoc[]
+
+=== 첨부파일 목록 조회
+DESCRIPTION
+```
+/api/posts/{postId}/attached-files
+```
+REQUEST
+
+include::{snippets}/getAttachedFileList/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/getAttachedFileList/http-response.adoc[]
+
+=== 이미지 파일 목록 조회
+DESCRIPTION
+```
+/api/posts/{postId}/img-files
+```
+REQUEST
+
+include::{snippets}/getImgFileList/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/getImgFileList/http-response.adoc[]
+
+=== 첨부파일 다운로드
+DESCRIPTION
+```
+/api/posts/attached-files/{storeFileName}
+```
+REQUEST
+
+include::{snippets}/downloadAttachedFile/http-request.adoc[]
+
+=== 이미지 파일 다운로드
+DESCRIPTION
+```
+/api/posts/img-files/{storeFileName}
+```
+REQUEST
+
+include::{snippets}/downloadImgFile/http-request.adoc[]
+
+=== 설문조사 조회
+DESCRIPTION
+```
+/api/posts/{postId}/survey
+```
+REQUEST
+
+include::{snippets}/getSurvey/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/getSurvey/http-response.adoc[]
+
+=== 게시글 목록 조회
+DESCRIPTION
+```
+페이지마다 게시글 10개
+```
+REQUEST
+
+include::{snippets}/getPostList/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/getPostList/http-response.adoc[]
+
+=== 게시글 수정
+DESCRIPTION
+```
+/api/posts/{postId}
+```
+REQUEST
+
+include::{snippets}/updatePost/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/updatePost/http-response.adoc[]
+
+=== 게시글 삭제
+DESCRIPTION
+```
+/api/posts/{postId}
+```
+REQUEST
+
+include::{snippets}/deletePost/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/deletePost/http-response.adoc[]
+
+=== 게시글 검색
+DESCRIPTION
+```
+type
+0 : 제목 검색(포함)
+1 : 내용 검색(포함)
+2 : 작성자 검색(일치)
+
+페이지마다 게시글 10개
+```
+REQUEST
+
+include::{snippets}/searchPosts/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/searchPosts/http-response.adoc[]
+
+=== 게시글 추천
+DESCRIPTION
+```
+/api/posts/{postId}/recommend
+```
+REQUEST
+
+include::{snippets}/recommendPost/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/recommendPost/http-response.adoc[]
+
+=== 게시글 추천 취소
+DESCRIPTION
+```
+/api/posts/{postId}/cancel-recommendation
+```
+REQUEST
+
+include::{snippets}/cancelRecommendationPost/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/cancelRecommendationPost/http-response.adoc[]
+
+=== 설문조사 투표
+DESCRIPTION
+```
+
+```
+REQUEST
+
+include::{snippets}/vote/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/vote/http-response.adoc[]
+
+== Comment
+=== 댓글 등록
+DESCRIPTION
+```
+
+```
+REQUEST
+
+include::{snippets}/addComment/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/addComment/http-response.adoc[]
+
+=== 댓글 목록 조회
+DESCRIPTION
+```
+
+```
+REQUEST
+
+include::{snippets}/getCommentList/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/getCommentList/http-response.adoc[]
+
+=== 댓글 삭제
+DESCRIPTION
+```
+/api/comments/{commentId}
+```
+REQUEST
+
+include::{snippets}/deleteComment/http-request.adoc[]
+
+RESPONSE
+
+include::{snippets}/deleteComment/http-response.adoc[]

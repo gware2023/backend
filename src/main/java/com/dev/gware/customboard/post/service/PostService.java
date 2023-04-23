@@ -2,6 +2,7 @@ package com.dev.gware.customboard.post.service;
 
 import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.response.*;
+import com.dev.gware.customboard.post.exception.QuestionNotIncludedInSurveyException;
 import org.springframework.core.io.UrlResource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +27,7 @@ public interface PostService {
 
     List<GetPostListRes> getPostList(GetPostListReq req);
 
-    void updatePost(long postId, UpdatePostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException;
+    void updatePost(long postId, UpdatePostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException;
 
     void deletePost(long postId, long userId);
 
@@ -36,5 +37,5 @@ public interface PostService {
 
     void cancelPostRecommendation(long postId, Long usrKey);
 
-    void vote(VoteReq req, Long usrKey);
+    void vote(VoteReq req, Long usrKey) throws QuestionNotIncludedInSurveyException;
 }

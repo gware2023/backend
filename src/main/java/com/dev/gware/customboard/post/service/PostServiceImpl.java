@@ -5,6 +5,7 @@ import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionReq;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.dto.response.element.SurveyQuestionRes;
+import com.dev.gware.customboard.post.exception.QuestionNotIncludedInSurveyException;
 import com.dev.gware.customboard.post.repository.*;
 import com.dev.gware.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -138,21 +139,23 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void updatePost(long postId, UpdatePostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq) throws IOException {
-        changePost(postId, req);
+    public void updatePost(long postId, UpdatePostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException {
+        if (postRepository.findByPostId(postId).getUserId() == userId) {
+            changePost(postId, req);
 
-        deleteFiles(attachedFileRepository, attachedFileDir, postId);
-        deleteFiles(imgFileRepository, imgFileDir, postId);
-        surveyRepository.deleteByPostId(postId);
+            deleteFiles(attachedFileRepository, attachedFileDir, postId);
+            deleteFiles(imgFileRepository, imgFileDir, postId);
+            surveyRepository.deleteByPostId(postId);
 
-        if (attachedFiles != null) {
-            saveFiles(attachedFiles, attachedFileRepository, attachedFileDir, postId);
-        }
-        if (imgFiles != null) {
-            saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
-        }
-        if (surveyReq != null) {
-            saveSurveyAndSurveyQuestion(surveyReq, postId, true);
+            if (attachedFiles != null) {
+                saveFiles(attachedFiles, attachedFileRepository, attachedFileDir, postId);
+            }
+            if (imgFiles != null) {
+                saveFiles(imgFiles, imgFileRepository, imgFileDir, postId);
+            }
+            if (surveyReq != null) {
+                saveSurveyAndSurveyQuestion(surveyReq, postId, true);
+            }
         }
     }
 
@@ -221,7 +224,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void vote(VoteReq req, Long userId) {
+    public void vote(VoteReq req, Long userId) throws QuestionNotIncludedInSurveyException {
         deleteVoteInfos(req.getSurveyId(), userId);
 
         saveVoteInfos(req, userId);
@@ -371,10 +374,13 @@ public class PostServiceImpl implements PostService {
         surveyVoteRepository.deleteAllBySurveyIdAndUserId(surveyId, userId);
     }
 
-    private void saveVoteInfos(VoteReq req, Long userId) {
+    private void saveVoteInfos(VoteReq req, Long userId) throws QuestionNotIncludedInSurveyException {
         List<Long> votedQuestionIdList = req.getVotedQuestionIdList();
         for (Long questionId : votedQuestionIdList) {
             SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(questionId);
+            if (surveyQuestion.getSurveyId() != req.getSurveyId()) {
+                throw new QuestionNotIncludedInSurveyException();
+            }
             surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() + 1);
             surveyQuestionRepository.save(surveyQuestion);
 

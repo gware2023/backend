@@ -3,6 +3,7 @@ package com.dev.gware.customboard.post.controller;
 import com.dev.gware.auth.domain.AuthUser;
 import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.response.*;
+import com.dev.gware.customboard.post.exception.QuestionNotIncludedInSurveyException;
 import com.dev.gware.customboard.post.repository.AttachedFileRepository;
 import com.dev.gware.customboard.post.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -94,9 +95,7 @@ public class PostController {
     public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId,
                                             @AuthenticationPrincipal AuthUser authUser) {
 
-        long userId = authUser.getUsrKey();
-
-        GetSurveyRes res = postService.getSurvey(postId, userId);
+        GetSurveyRes res = postService.getSurvey(postId, authUser.getUsrKey());
 
         return ResponseEntity.ok().body(res);
     }
@@ -114,9 +113,10 @@ public class PostController {
                                              @RequestPart @Valid UpdatePostReq req,
                                              @RequestPart @Nullable List<MultipartFile> attachedFiles,
                                              @RequestPart @Nullable List<MultipartFile> imgFiles,
-                                             @RequestPart @Nullable @Valid SurveyReq surveyReq) throws IOException {
+                                             @RequestPart @Nullable @Valid SurveyReq surveyReq,
+                                             @AuthenticationPrincipal AuthUser authUser) throws IOException {
 
-        postService.updatePost(postId, req, attachedFiles, imgFiles, surveyReq);
+        postService.updatePost(postId, req, attachedFiles, imgFiles, surveyReq, authUser.getUsrKey());
 
         return ResponseEntity.ok().build();
     }
@@ -158,7 +158,7 @@ public class PostController {
 
     @PatchMapping("/vote")
     public ResponseEntity<Object> vote(@RequestBody VoteReq req,
-                                       @AuthenticationPrincipal AuthUser authUser) {
+                                       @AuthenticationPrincipal AuthUser authUser) throws QuestionNotIncludedInSurveyException {
 
         postService.vote(req, authUser.getUsrKey());
 

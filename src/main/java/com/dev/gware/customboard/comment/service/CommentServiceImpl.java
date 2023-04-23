@@ -46,7 +46,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(long commentId, long userId) {
         Comment comment = commentRepository.findByCommentId(commentId);
-        if (comment.getUserId() == userId) {
+        if (comment != null && comment.getUserId() == userId) {
             commentRepository.deleteByCommentId(commentId);
         }
     }

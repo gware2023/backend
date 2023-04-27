@@ -2,6 +2,8 @@ package com.dev.gware.user;
 
 import com.dev.gware.auth.domain.AuthUser;
 import com.dev.gware.user.domain.UsrInfo;
+import com.dev.gware.user.dto.request.UpdateUserReq;
+import com.dev.gware.user.dto.response.GetUserRes;
 import com.dev.gware.user.exception.UserNotFoundException;
 import com.dev.gware.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +13,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
 
 @Slf4j
 @Service
@@ -35,5 +35,21 @@ public class UserService implements UserDetailsService {
                 .usrId(findUsrInfo.getUsrId())
                 .usrPwd(findUsrInfo.getUsrPwd())
                 .build();
+    }
+
+    public GetUserRes findByKey(Long usrKey) {
+        UsrInfo findUser = userMapper.findByKey(usrKey);
+        if (findUser == null) {
+            throw new UserNotFoundException();
+        }
+        return new GetUserRes(findUser);
+    }
+
+    public void updateUser(UpdateUserReq updateUserReq) {
+        UsrInfo findUser = userMapper.findByKey(updateUserReq.getUsrKey());
+        if (findUser == null) {
+            throw new UserNotFoundException();
+        }
+        userMapper.updateUser(updateUserReq);
     }
 }

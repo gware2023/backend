@@ -6,10 +6,10 @@ import com.dev.gware.customboard.board.dto.response.GetBoardListRes;
 import java.util.List;
 
 public interface BoardService {
-    void addBoard(AddBoardReq req);
+    void addBoard(AddBoardReq req, long userId);
 
     List<GetBoardListRes> getBoardList();
 
-    void deleteBoard(long boardId);
+    void deleteBoard(long boardId, long userId);
 
 }

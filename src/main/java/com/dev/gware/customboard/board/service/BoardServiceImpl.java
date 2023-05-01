@@ -18,9 +18,10 @@ public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
 
     @Override
-    public void addBoard(AddBoardReq req) {
+    public void addBoard(AddBoardReq req, long userId) {
         Board board = new Board();
         BeanUtils.copyProperties(req, board);
+        board.setUserId(userId);
         boardRepository.save(board);
     }
 
@@ -38,8 +39,11 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public void deleteBoard(long boardId) {
-        boardRepository.deleteByBoardId(boardId);
+    public void deleteBoard(long boardId, long userId) {
+        Board board = boardRepository.findByBoardId(boardId);
+        if (board.getUserId() == userId) {
+            boardRepository.deleteByBoardId(boardId);
+        }
     }
 
 }

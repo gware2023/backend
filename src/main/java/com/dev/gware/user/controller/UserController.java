@@ -6,7 +6,11 @@ import com.dev.gware.user.dto.request.UpdateUserReq;
 import com.dev.gware.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -16,9 +20,14 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping
+    @GetMapping("/test")
     public CommonResponse test() {
         return new CommonResponse(true, 200, "토큰 잘확인 됨");
+    }
+
+    @GetMapping
+    public CommonResponse<Page<GetUserRes>> findAll(Pageable pageable) {
+        return new CommonResponse<>(true, 200, "회원 목록 조회 성공", userService.findAll(pageable));
     }
 
     @GetMapping("/{userId}")

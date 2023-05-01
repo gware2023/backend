@@ -8,6 +8,8 @@ import com.dev.gware.user.exception.UserNotFoundException;
 import com.dev.gware.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -46,6 +48,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new UserNotFoundException();
         }
         return new GetUserRes(findUserOptional.get());
+    }
+
+    @Override
+    public Page<GetUserRes> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable).map(GetUserRes::new);
     }
 
     @Override

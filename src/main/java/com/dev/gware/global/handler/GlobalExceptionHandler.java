@@ -6,7 +6,6 @@ import com.dev.gware.common.response.CommonResponse;
 import com.dev.gware.common.response.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,7 +30,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-            NotFoundException.class,
             UsernameNotFoundException.class
     })
     @ResponseStatus(NOT_FOUND)

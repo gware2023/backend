@@ -10,11 +10,11 @@ import java.util.Collection;
 @Builder
 public class AuthUser implements UserDetails {
 
-    private Long usrKey;
+    private Long id;
 
-    private String usrId;
+    private String loginId;
 
-    private String usrPwd;
+    private String password;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -23,12 +23,12 @@ public class AuthUser implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.usrPwd;
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return this.usrId;
+        return this.loginId;
     }
 
     @Override

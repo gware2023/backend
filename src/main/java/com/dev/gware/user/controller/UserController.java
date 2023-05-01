@@ -1,8 +1,9 @@
-package com.dev.gware.user;
+package com.dev.gware.user.controller;
 
 import com.dev.gware.common.response.CommonResponse;
 import com.dev.gware.user.dto.response.GetUserRes;
 import com.dev.gware.user.dto.request.UpdateUserReq;
+import com.dev.gware.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +21,9 @@ public class UserController {
         return new CommonResponse(true, 200, "토큰 잘확인 됨");
     }
 
-    @GetMapping("/{usrKey}")
-    public CommonResponse<GetUserRes> getUser(@PathVariable Long usrKey) {
-        return new CommonResponse<>(true, 200, "회원 조회 성공", userService.findByKey(usrKey));
+    @GetMapping("/{userId}")
+    public CommonResponse<GetUserRes> getUser(@PathVariable Long userId) {
+        return new CommonResponse<>(true, 200, "회원 조회 성공", userService.findById(userId));
     }
 
     @PutMapping

@@ -6,11 +6,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 @Data
 public class LoginRequest {
 
-    private String usrId;
+    private String loginId;
 
-    private String usrPwd;
+    private String password;
 
     public UsernamePasswordAuthenticationToken toAuthentication() {
-        return new UsernamePasswordAuthenticationToken(usrId, usrPwd);
+        return new UsernamePasswordAuthenticationToken(loginId, password);
     }
 }

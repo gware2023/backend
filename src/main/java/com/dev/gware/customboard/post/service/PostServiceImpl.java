@@ -7,7 +7,9 @@ import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.dto.response.element.SurveyQuestionRes;
 import com.dev.gware.customboard.post.exception.QuestionNotIncludedInSurveyException;
 import com.dev.gware.customboard.post.repository.*;
-import com.dev.gware.user.mapper.UserMapper;
+import com.dev.gware.user.domain.Users;
+import com.dev.gware.user.exception.UserNotFoundException;
+import com.dev.gware.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -38,7 +41,7 @@ public class PostServiceImpl implements PostService {
     private final SurveyQuestionRepository surveyQuestionRepository;
     private final SurveyVoteRepository surveyVoteRepository;
     private final PostRecommendationRepository postRecommendationRepository;
-    private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
     @Value("${attached.file.dir}")
     private String attachedFileDir;
@@ -238,8 +241,11 @@ public class PostServiceImpl implements PostService {
         Post post = new Post();
         BeanUtils.copyProperties(req, post);
         post.setUserId(userId);
-        String userName = userMapper.findByKey(post.getUserId()).getKorNm();
-        post.setUserName(userName);
+        Optional<Users> findUserOptional = userRepository.findById(post.getUserId());
+        if (findUserOptional.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        post.setUserName(findUserOptional.get().getName());
 
         return postRepository.save(post);
     }

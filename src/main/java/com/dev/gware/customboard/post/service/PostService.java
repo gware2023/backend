@@ -33,9 +33,9 @@ public interface PostService {
 
     List<SearchPostsRes> searchPosts(SearchPostsReq req);
 
-    void recommendPost(long postId, Long usrKey);
+    void recommendPost(long postId, Long userId);
 
-    void cancelPostRecommendation(long postId, Long usrKey);
+    void cancelPostRecommendation(long postId, Long userId);
 
-    void vote(VoteReq req, Long usrKey) throws QuestionNotIncludedInSurveyException;
+    void vote(VoteReq req, Long userId) throws QuestionNotIncludedInSurveyException;
 }

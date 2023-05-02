@@ -37,10 +37,10 @@ public class ExceptionControllerAdvice {
         return new ErrorResponse("400", "JSON 형식이 유효하지 않습니다.");
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(value = UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler
     public ErrorResponse userNotFoundException(UserNotFoundException e) {
-        return new ErrorResponse("404", e.getMessage());
+        return new ErrorResponse("500", "사용자 정보가 존재하지 않습니다.");
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

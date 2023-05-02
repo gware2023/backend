@@ -157,7 +157,7 @@ public class PostController {
     }
 
     @PatchMapping("/vote")
-    public ResponseEntity<Object> vote(@RequestBody VoteReq req,
+    public ResponseEntity<Object> vote(@RequestBody @Valid VoteReq req,
                                        @AuthenticationPrincipal AuthUser authUser) throws QuestionNotIncludedInSurveyException {
 
         postService.vote(req, authUser.getId());

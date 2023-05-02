@@ -1,9 +1,7 @@
 package com.dev.gware.customboard.post.dto.request;
 
 import com.dev.gware.customboard.post.dto.request.element.SurveyQuestionReq;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -12,6 +10,8 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
 public class SurveyReq {
     @NotBlank

@@ -1,5 +1,6 @@
 package com.dev.gware.customboard.post.service;
 
+import com.dev.gware.customboard.post.domain.Post;
 import com.dev.gware.customboard.post.dto.request.*;
 import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.exception.QuestionNotIncludedInSurveyException;
@@ -11,7 +12,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 public interface PostService {
-    void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException;
+    Post addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException;
 
     GetPostRes getPost(long postId);
 
@@ -33,9 +34,9 @@ public interface PostService {
 
     List<SearchPostsRes> searchPosts(SearchPostsReq req);
 
-    void recommendPost(long postId, Long userId);
+    void recommendPost(long postId, long userId);
 
-    void cancelPostRecommendation(long postId, Long userId);
+    void cancelPostRecommendation(long postId, long userId);
 
-    void vote(VoteReq req, Long userId) throws QuestionNotIncludedInSurveyException;
+    void vote(VoteReq req, long userId) throws QuestionNotIncludedInSurveyException;
 }

@@ -24,7 +24,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
 
     @Override
-    public void addComment(AddCommentReq req, long userId) {
+    public Comment addComment(AddCommentReq req, long userId) {
         Comment comment = new Comment();
         BeanUtils.copyProperties(req, comment);
         comment.setUserId(userId);
@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
         }
         comment.setUserName(findUserOptional.get().getName());
 
-        commentRepository.save(comment);
+        return commentRepository.save(comment);
     }
 
     @Override

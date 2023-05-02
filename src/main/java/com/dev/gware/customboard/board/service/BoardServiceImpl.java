@@ -18,11 +18,11 @@ public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
 
     @Override
-    public void addBoard(AddBoardReq req, long userId) {
+    public Board addBoard(AddBoardReq req, long userId) {
         Board board = new Board();
         BeanUtils.copyProperties(req, board);
         board.setUserId(userId);
-        boardRepository.save(board);
+        return boardRepository.save(board);
     }
 
     @Override

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface SurveyVoteRepository extends JpaRepository<SurveyVote, Long> {
-    List<SurveyVote> findBySurveyIdAndAndUserId(long surveyId, long userId);
+    List<SurveyVote> findBySurveyIdAndUserId(long surveyId, long userId);
 
     void deleteAllBySurveyIdAndUserId(long surveyId, long userId);
 }

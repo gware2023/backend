@@ -50,7 +50,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException {
+    public Post addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException {
         Post savedPost = savePost(req, userId);
         long postId = savedPost.getPostId();
 
@@ -63,6 +63,7 @@ public class PostServiceImpl implements PostService {
         if (surveyReq != null) {
             saveSurveyAndSurveyQuestion(surveyReq, postId, false);
         }
+        return savedPost;
     }
 
     @Override
@@ -119,7 +120,7 @@ public class PostServiceImpl implements PostService {
     public GetSurveyRes getSurvey(long postId, long userId) {
         Survey survey = surveyRepository.findByPostId(postId);
         List<SurveyQuestion> surveyQuestionList = surveyQuestionRepository.findBySurveyId(survey.getSurveyId());
-        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(survey.getSurveyId(), userId);
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndUserId(survey.getSurveyId(), userId);
 
         GetSurveyRes res = new GetSurveyRes();
         res.setSurveyQuestionResList(new ArrayList<>());
@@ -200,7 +201,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void recommendPost(long postId, Long userId) {
+    public void recommendPost(long postId, long userId) {
         PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, userId);
         if (postRecommendation == null) {
             postRecommendation = new PostRecommendation(postId, userId);
@@ -214,7 +215,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void cancelPostRecommendation(long postId, Long userId) {
+    public void cancelPostRecommendation(long postId, long userId) {
         PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, userId);
         if (postRecommendation != null) {
             postRecommendationRepository.deleteByPostIdAndUserId(postId, userId);
@@ -227,7 +228,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void vote(VoteReq req, Long userId) throws QuestionNotIncludedInSurveyException {
+    public void vote(VoteReq req, long userId) throws QuestionNotIncludedInSurveyException {
         deleteVoteInfos(req.getSurveyId(), userId);
 
         saveVoteInfos(req, userId);
@@ -246,7 +247,6 @@ public class PostServiceImpl implements PostService {
             throw new UserNotFoundException();
         }
         post.setUserName(findUserOptional.get().getName());
-
         return postRepository.save(post);
     }
 
@@ -371,7 +371,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private void deleteVoteInfos(long surveyId, Long userId) {
-        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(surveyId, userId);
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndUserId(surveyId, userId);
         for (SurveyVote surveyVote : surveyVoteList) {
             SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(surveyVote.getQuestionId());
             surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() - 1);
@@ -384,7 +384,7 @@ public class PostServiceImpl implements PostService {
         List<Long> votedQuestionIdList = req.getVotedQuestionIdList();
         for (Long questionId : votedQuestionIdList) {
             SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(questionId);
-            if (surveyQuestion.getSurveyId() != req.getSurveyId()) {
+            if (surveyQuestion == null || surveyQuestion.getSurveyId() != req.getSurveyId()) {
                 throw new QuestionNotIncludedInSurveyException();
             }
             surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() + 1);

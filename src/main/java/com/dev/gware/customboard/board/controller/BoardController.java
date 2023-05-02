@@ -26,7 +26,7 @@ public class BoardController {
     public ResponseEntity<Object> addBoard(@RequestBody @Valid AddBoardReq req,
                                            @AuthenticationPrincipal AuthUser authUser) {
 
-        boardService.addBoard(req, authUser.getUsrKey());
+        boardService.addBoard(req, authUser.getId());
 
         return ResponseEntity.ok().build();
     }
@@ -43,7 +43,7 @@ public class BoardController {
     public ResponseEntity<Object> deleteBoard(@PathVariable @Min(1L) long boardId,
                                               @AuthenticationPrincipal AuthUser authUser) {
 
-        boardService.deleteBoard(boardId, authUser.getUsrKey());
+        boardService.deleteBoard(boardId, authUser.getId());
 
         return ResponseEntity.ok().build();
     }

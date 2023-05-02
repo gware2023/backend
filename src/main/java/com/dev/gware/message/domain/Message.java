@@ -2,15 +2,16 @@ package com.dev.gware.message.domain;
 
 import com.dev.gware.user.domain.Users;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter
 @Entity(name = "MESSAGES")
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Message {
 
@@ -39,4 +40,20 @@ public class Message {
     @CreatedDate
     @Column(name = "CREATE_DATETIME", updatable = false)
     private LocalDateTime createdDate;
+
+    public Message(String title, String content, Users sender, Users receiver, MessageStatus status) {
+        this.title = title;
+        this.content = content;
+        this.sender = sender;
+        this.receiver = receiver;
+        this.status = status;
+    }
+
+    public void readMessage() {
+        this.status = MessageStatus.READ;
+    }
+
+    public void deleteMessage() {
+        this.status = MessageStatus.DELETE;
+    }
 }

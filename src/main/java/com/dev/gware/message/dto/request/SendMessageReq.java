@@ -17,12 +17,6 @@ public class SendMessageReq {
     private String content;
 
     public Message createMessage(Users sender, Users receiver) {
-        Message message = new Message();
-        message.setSender(sender);
-        message.setReceiver(receiver);
-        message.setStatus(MessageStatus.SEND);
-        message.setTitle(this.title);
-        message.setContent(this.content);
-        return message;
+        return new Message(this.title, this.content, sender, receiver, MessageStatus.SEND);
     }
 }

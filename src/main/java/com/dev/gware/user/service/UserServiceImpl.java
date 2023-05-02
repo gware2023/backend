@@ -2,6 +2,7 @@ package com.dev.gware.user.service;
 
 import com.dev.gware.auth.domain.AuthUser;
 import com.dev.gware.user.domain.Users;
+import com.dev.gware.user.dto.request.CreateUserReq;
 import com.dev.gware.user.dto.request.UpdateUserReq;
 import com.dev.gware.user.dto.response.GetUserRes;
 import com.dev.gware.user.exception.UserNotFoundException;
@@ -66,5 +67,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         findUser.setEmail(updateUserReq.getEmail());
 
         userRepository.save(findUser);
+    }
+
+    @Override
+    public Users addUser(CreateUserReq createUserReq) {
+        // TODO LoginID, Email 중복 검사, 패스워드 유효성 검사 등 추가해야됨 by.csi
+        return userRepository.save(createUserReq.toUser());
     }
 }

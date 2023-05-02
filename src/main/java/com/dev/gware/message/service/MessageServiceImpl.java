@@ -2,6 +2,8 @@ package com.dev.gware.message.service;
 
 import com.dev.gware.message.domain.Message;
 import com.dev.gware.message.dto.request.SendMessageReq;
+import com.dev.gware.message.dto.response.GetMessageRes;
+import com.dev.gware.message.exception.MessageNotFoundException;
 import com.dev.gware.message.repository.MessageRepository;
 import com.dev.gware.user.domain.Users;
 import com.dev.gware.user.exception.UserNotFoundException;
@@ -37,5 +39,25 @@ public class MessageServiceImpl implements MessageService {
         }
         Message message = sendMessageReq.createMessage(senderOptional.get(), receiverOptional.get());
         messageRepository.save(message);
+    }
+
+    @Override
+    public GetMessageRes findMessage(Long messageId, Long userId) {
+        Optional<Message> findMessageOptional = messageRepository.findById(messageId);
+        if (findMessageOptional.isEmpty()) {
+            throw new MessageNotFoundException();
+        }
+        Message findMessage = findMessageOptional.get();
+
+        Long receiverId = findMessage.getReceiver().getId();
+        if (userId != receiverId) {
+            throw new MessageNotFoundException(); // 쪽지를 조회한 유저가 쪽지의 대상이 아니면 쪽지는 없는 것으로 처리
+        }
+
+        // TODO 삭제된 message의 경우도 처리 해야됨 / 어떻게 처리할지?
+        findMessage.readMessage();
+        messageRepository.save(findMessage);
+
+        return new GetMessageRes(findMessage);
     }
 }

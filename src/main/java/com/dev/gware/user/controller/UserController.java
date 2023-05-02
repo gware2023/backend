@@ -1,6 +1,7 @@
 package com.dev.gware.user.controller;
 
 import com.dev.gware.common.response.CommonResponse;
+import com.dev.gware.user.dto.request.CreateUserReq;
 import com.dev.gware.user.dto.response.GetUserRes;
 import com.dev.gware.user.dto.request.UpdateUserReq;
 import com.dev.gware.user.service.UserService;
@@ -9,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -33,6 +32,12 @@ public class UserController {
     @GetMapping("/{userId}")
     public CommonResponse<GetUserRes> getUser(@PathVariable Long userId) {
         return new CommonResponse<>(true, 200, "회원 조회 성공", userService.findById(userId));
+    }
+
+    @PostMapping
+    public CommonResponse addUser(@RequestBody CreateUserReq createUserReq) {
+        return new CommonResponse(true, 200, "회원 정보 생성 성공",
+                new GetUserRes(userService.addUser(createUserReq)));
     }
 
     @PutMapping

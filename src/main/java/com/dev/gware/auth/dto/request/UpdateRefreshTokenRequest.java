@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UpdateRefreshTokenRequest {
 
-    private final long usrKey;
+    private final long userId;
 
     private final String refreshToken;
 }

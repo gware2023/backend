@@ -1,6 +1,6 @@
 package com.dev.gware.user.dto.response;
 
-import com.dev.gware.user.domain.UsrInfo;
+import com.dev.gware.user.domain.Users;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,18 +8,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GetUserRes {
 
-    private Long usrKey;
+    private Long userId;
 
-    private String usrId;
+    private String loginId;
 
-    private String korNm;
+    private String username;
 
-    private String emailAddr;
+    private String email;
 
-    public GetUserRes(UsrInfo user) {
-        this.usrKey = user.getUsrKey();
-        this.usrId = user.getUsrId();
-        this.korNm = user.getKorNm();
-        this.emailAddr = user.getEmailAddr();
+    public GetUserRes(Users user) {
+        this.userId = user.getId();
+        this.loginId = user.getLoginId();
+        this.username = user.getName();
+        this.email = user.getEmail();
     }
 }

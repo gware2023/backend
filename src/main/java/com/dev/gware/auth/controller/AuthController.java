@@ -1,8 +1,9 @@
-package com.dev.gware.auth;
+package com.dev.gware.auth.controller;
 
 import com.dev.gware.auth.dto.request.LoginRequest;
 import com.dev.gware.auth.dto.response.LoginResponse;
 import com.dev.gware.auth.dto.response.RefreshResponse;
+import com.dev.gware.auth.service.AuthService;
 import com.dev.gware.common.response.ResponseService;
 import com.dev.gware.common.response.SingleResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import static com.dev.gware.auth.jwt.JwtProvider.REFRESH_TOKEN_HEADER;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor

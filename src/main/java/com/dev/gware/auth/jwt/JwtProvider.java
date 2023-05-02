@@ -5,8 +5,9 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.dev.gware.auth.domain.AuthUser;
-import com.dev.gware.auth.mapper.AuthMapper;
-import com.dev.gware.user.domain.UsrInfo;
+import com.dev.gware.user.domain.Users;
+import com.dev.gware.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,6 +18,7 @@ import java.util.Date;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
 
     public static final String JWT_SECRET = "dHlwZS1maS1zZWNyZXQ="; // "type-fi-secret" base64 encoding
@@ -36,11 +38,7 @@ public class JwtProvider {
 
     private final Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET.getBytes());
 
-    private final AuthMapper authMapper;
-
-    public JwtProvider(AuthMapper authMapper) {
-        this.authMapper = authMapper;
-    }
+    private final UserRepository userRepository;
 
     public boolean hasJwtHeader(String authorizationHeader) {
         return authorizationHeader == null || !authorizationHeader.startsWith(JWT_HEADER_PREFIX);
@@ -64,13 +62,13 @@ public class JwtProvider {
     // jwt 인증 객체 가져오기
     public Authentication getAuthentication(final String accessToken) {
         DecodedJWT decodedJWT = getDecodedJWT(accessToken);
-        String usrId = decodedJWT.getSubject();
+        String loginId = decodedJWT.getSubject();
 
-        UsrInfo findUsrInfo = authMapper.findById(usrId);
+        Users findUser = userRepository.findByLoginId(loginId);
         AuthUser authUser = AuthUser.builder()
-                .usrKey(findUsrInfo.getUsrKey())
-                .usrId(findUsrInfo.getUsrId())
-                .usrPwd(findUsrInfo.getUsrPwd())
+                .id(findUser.getId())
+                .loginId(findUser.getLoginId())
+                .password(findUser.getPassword())
                 .build();
 
         return new UsernamePasswordAuthenticationToken(authUser, "", authUser.getAuthorities());

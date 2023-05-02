@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class UpdateUserReq {
-    private Long usrKey;
+    private Long userId;
 
-    private String korNm;
+    private String username;
 
-    private String emailAddr;
+    private String email;
 }

@@ -1,6 +1,7 @@
 package com.dev.gware.customboard.exhandler;
 
 import com.dev.gware.customboard.post.exception.QuestionNotIncludedInSurveyException;
+import com.dev.gware.user.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,6 +35,12 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler
     public ErrorResponse HttpMessageNotReadableExceptionHandle(HttpMessageNotReadableException e) {
         return new ErrorResponse("400", "JSON 형식이 유효하지 않습니다.");
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(value = UserNotFoundException.class)
+    public ErrorResponse userNotFoundException(UserNotFoundException e) {
+        return new ErrorResponse("404", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

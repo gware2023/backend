@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @ToString
 public class VoteReq {
+    @NotNull
     @Min(1L)
     long surveyId;
     @NotNull

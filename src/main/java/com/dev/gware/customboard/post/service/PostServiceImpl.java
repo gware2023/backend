@@ -7,7 +7,9 @@ import com.dev.gware.customboard.post.dto.response.*;
 import com.dev.gware.customboard.post.dto.response.element.SurveyQuestionRes;
 import com.dev.gware.customboard.post.exception.QuestionNotIncludedInSurveyException;
 import com.dev.gware.customboard.post.repository.*;
-import com.dev.gware.user.mapper.UserMapper;
+import com.dev.gware.user.domain.Users;
+import com.dev.gware.user.exception.UserNotFoundException;
+import com.dev.gware.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -38,16 +41,16 @@ public class PostServiceImpl implements PostService {
     private final SurveyQuestionRepository surveyQuestionRepository;
     private final SurveyVoteRepository surveyVoteRepository;
     private final PostRecommendationRepository postRecommendationRepository;
-    private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
-    @Value("${attached.file.dir}")
+//    @Value("${attached.file.dir}")
     private String attachedFileDir;
-    @Value("${img.file.dir}")
+//    @Value("${img.file.dir}")
     private String imgFileDir;
 
     @Override
     @Transactional
-    public void addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException {
+    public Post addPost(AddPostReq req, List<MultipartFile> attachedFiles, List<MultipartFile> imgFiles, SurveyReq surveyReq, long userId) throws IOException {
         Post savedPost = savePost(req, userId);
         long postId = savedPost.getPostId();
 
@@ -60,6 +63,7 @@ public class PostServiceImpl implements PostService {
         if (surveyReq != null) {
             saveSurveyAndSurveyQuestion(surveyReq, postId, false);
         }
+        return savedPost;
     }
 
     @Override
@@ -116,7 +120,7 @@ public class PostServiceImpl implements PostService {
     public GetSurveyRes getSurvey(long postId, long userId) {
         Survey survey = surveyRepository.findByPostId(postId);
         List<SurveyQuestion> surveyQuestionList = surveyQuestionRepository.findBySurveyId(survey.getSurveyId());
-        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(survey.getSurveyId(), userId);
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndUserId(survey.getSurveyId(), userId);
 
         GetSurveyRes res = new GetSurveyRes();
         res.setSurveyQuestionResList(new ArrayList<>());
@@ -197,7 +201,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void recommendPost(long postId, Long userId) {
+    public void recommendPost(long postId, long userId) {
         PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, userId);
         if (postRecommendation == null) {
             postRecommendation = new PostRecommendation(postId, userId);
@@ -211,7 +215,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void cancelPostRecommendation(long postId, Long userId) {
+    public void cancelPostRecommendation(long postId, long userId) {
         PostRecommendation postRecommendation = postRecommendationRepository.findByPostIdAndUserId(postId, userId);
         if (postRecommendation != null) {
             postRecommendationRepository.deleteByPostIdAndUserId(postId, userId);
@@ -224,7 +228,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void vote(VoteReq req, Long userId) throws QuestionNotIncludedInSurveyException {
+    public void vote(VoteReq req, long userId) throws QuestionNotIncludedInSurveyException {
         deleteVoteInfos(req.getSurveyId(), userId);
 
         saveVoteInfos(req, userId);
@@ -238,9 +242,11 @@ public class PostServiceImpl implements PostService {
         Post post = new Post();
         BeanUtils.copyProperties(req, post);
         post.setUserId(userId);
-        String userName = userMapper.findByKey(post.getUserId()).getKorNm();
-        post.setUserName(userName);
-
+        Optional<Users> findUserOptional = userRepository.findById(post.getUserId());
+        if (findUserOptional.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        post.setUserName(findUserOptional.get().getName());
         return postRepository.save(post);
     }
 
@@ -365,7 +371,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private void deleteVoteInfos(long surveyId, Long userId) {
-        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndAndUserId(surveyId, userId);
+        List<SurveyVote> surveyVoteList = surveyVoteRepository.findBySurveyIdAndUserId(surveyId, userId);
         for (SurveyVote surveyVote : surveyVoteList) {
             SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(surveyVote.getQuestionId());
             surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() - 1);
@@ -378,7 +384,7 @@ public class PostServiceImpl implements PostService {
         List<Long> votedQuestionIdList = req.getVotedQuestionIdList();
         for (Long questionId : votedQuestionIdList) {
             SurveyQuestion surveyQuestion = surveyQuestionRepository.findByQuestionId(questionId);
-            if (surveyQuestion.getSurveyId() != req.getSurveyId()) {
+            if (surveyQuestion == null || surveyQuestion.getSurveyId() != req.getSurveyId()) {
                 throw new QuestionNotIncludedInSurveyException();
             }
             surveyQuestion.setVoteCount(surveyQuestion.getVoteCount() + 1);

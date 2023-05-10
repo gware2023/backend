@@ -41,7 +41,7 @@ public class PostController {
                                           @RequestPart @Nullable @Valid SurveyReq surveyReq,
                                           @AuthenticationPrincipal AuthUser authUser) throws IOException {
 
-        postService.addPost(req, attachedFiles, imgFiles, surveyReq, authUser.getUsrKey());
+        postService.addPost(req, attachedFiles, imgFiles, surveyReq, authUser.getId());
 
         return ResponseEntity.ok().build();
     }
@@ -95,7 +95,7 @@ public class PostController {
     public ResponseEntity<Object> getSurvey(@PathVariable @Min(1L) long postId,
                                             @AuthenticationPrincipal AuthUser authUser) {
 
-        GetSurveyRes res = postService.getSurvey(postId, authUser.getUsrKey());
+        GetSurveyRes res = postService.getSurvey(postId, authUser.getId());
 
         return ResponseEntity.ok().body(res);
     }
@@ -116,7 +116,7 @@ public class PostController {
                                              @RequestPart @Nullable @Valid SurveyReq surveyReq,
                                              @AuthenticationPrincipal AuthUser authUser) throws IOException {
 
-        postService.updatePost(postId, req, attachedFiles, imgFiles, surveyReq, authUser.getUsrKey());
+        postService.updatePost(postId, req, attachedFiles, imgFiles, surveyReq, authUser.getId());
 
         return ResponseEntity.ok().build();
     }
@@ -125,7 +125,7 @@ public class PostController {
     public ResponseEntity<Object> deletePost(@PathVariable @Min(1L) long postId,
                                              @AuthenticationPrincipal AuthUser authUser) {
 
-        postService.deletePost(postId, authUser.getUsrKey());
+        postService.deletePost(postId, authUser.getId());
 
         return ResponseEntity.ok().build();
     }
@@ -142,7 +142,7 @@ public class PostController {
     public ResponseEntity<Object> recommendPost(@PathVariable @Min(1L) long postId,
                                                 @AuthenticationPrincipal AuthUser authUser) {
 
-        postService.recommendPost(postId, authUser.getUsrKey());
+        postService.recommendPost(postId, authUser.getId());
 
         return ResponseEntity.ok().build();
     }
@@ -151,16 +151,16 @@ public class PostController {
     public ResponseEntity<Object> cancelRecommendationPost(@PathVariable @Min(1L) long postId,
                                                            @AuthenticationPrincipal AuthUser authUser) {
 
-        postService.cancelPostRecommendation(postId, authUser.getUsrKey());
+        postService.cancelPostRecommendation(postId, authUser.getId());
 
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/vote")
-    public ResponseEntity<Object> vote(@RequestBody VoteReq req,
+    public ResponseEntity<Object> vote(@RequestBody @Valid VoteReq req,
                                        @AuthenticationPrincipal AuthUser authUser) throws QuestionNotIncludedInSurveyException {
 
-        postService.vote(req, authUser.getUsrKey());
+        postService.vote(req, authUser.getId());
 
         return ResponseEntity.ok().build();
     }

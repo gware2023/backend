@@ -25,6 +25,10 @@ public class Board {
     @Column(name = "NAME")
     String name;
 
+    @NonNull
+    @Column(name = "USER_ID")
+    long userId;
+
     @Column(name = "CREATE_DATETIME")
     String createDatetime;
 }

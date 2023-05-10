@@ -27,7 +27,7 @@ public class CommentController {
     public ResponseEntity<Object> addComment(@RequestBody @Valid AddCommentReq req,
                                              @AuthenticationPrincipal AuthUser authUser) {
 
-        commentService.addComment(req, authUser.getUsrKey());
+        commentService.addComment(req, authUser.getId());
 
         return ResponseEntity.ok().build();
     }
@@ -44,7 +44,7 @@ public class CommentController {
     public ResponseEntity<Object> deleteComment(@PathVariable @Min(1L) long commentId,
                                                 @AuthenticationPrincipal AuthUser authUser) {
 
-        commentService.deleteComment(commentId, authUser.getUsrKey());
+        commentService.deleteComment(commentId, authUser.getId());
 
         return ResponseEntity.ok().build();
     }

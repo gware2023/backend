@@ -4,9 +4,9 @@ package com.dev.gware.global.handler;
 import com.dev.gware.auth.exception.RefreshTokenNotSameException;
 import com.dev.gware.common.response.CommonResponse;
 import com.dev.gware.common.response.ResponseService;
+import com.dev.gware.message.exception.MessageNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,8 +31,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-            NotFoundException.class,
-            UsernameNotFoundException.class
+            UsernameNotFoundException.class,
+            MessageNotFoundException.class
     })
     @ResponseStatus(NOT_FOUND)
     public CommonResponse notFoundException(final Exception e) {

@@ -43,9 +43,9 @@ public class PostServiceImpl implements PostService {
     private final PostRecommendationRepository postRecommendationRepository;
     private final UserRepository userRepository;
 
-    @Value("${attached.file.dir}")
+//    @Value("${attached.file.dir}")
     private String attachedFileDir;
-    @Value("${img.file.dir}")
+//    @Value("${img.file.dir}")
     private String imgFileDir;
 
     @Override
